@@ -21,6 +21,52 @@
 
     </header>
 
+    <section class="p-3  ">
+      <a name="iuthentication"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 6
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Laravel 10, работа с очередями за 9 минут, Ларавел Queues</h5>
+          <p class="card-text">
+            В видео максимально просто и быстро рассказывается про работу с очередями в ларавел 10 , как происходит подключение и создание очереди в базе, как она выполняется с помощью воркера , и что произойдет если будет ошибка выполнения.<br>
+            <hr/></p>
+<pre>
+Использовано в видео:
+QUEUE_CONNECTION=database // изменения в .env файле фреймворка
+<hr/>cd domains\demo // переходим в папку фреймворка
+php artisan queue:table // создаем  миграцию для таблицы в базе (create_jobs_table)
+php artisan migrate // запускаем миграцию и создается таблица (jobs)
+php artisan make:job TestJob // создаем папку Jobs с заданием TestJob
+<hr/>use App\Jobs\TestJob; // подключаем очередь в контроллер
+TestJob::dispatch(); // в котроллере запускаем очередь
+<hr/>sleep(15);  // создаем задание для очереди , ждем 15 секунд
+dump('prived medved');  // пишем в консоль prived medved
+<hr/>php artisan queue:work // запускаем воркера в консоли
+<hr/>use Illuminate\Support\Facades\DB;  // подключаем фасад базы данных
+sleep(10); // создаем второе задание для очереди , ждем 10 секунд
+DB::table('users')->insertOrIgnore([ // В таблицу users вносим запись
+  'name' => 'medved',  // имя пользователя
+  'email' => 'medved@mail.com',  // емайл
+  'password' => '12345678',   // пароль
+  ]);
+<hr/>php artisan queue:flush  // удаляем все записи из таблицы failed_jobs
+
+</pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 22 апреля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://www.youtube.com/watch?v=GwIPd-SvUxI">https://www.youtube.com/watch?v=GwIPd-SvUxI</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
 
     <section class="p-3  ">
       <a name="iuthentication"></a>
