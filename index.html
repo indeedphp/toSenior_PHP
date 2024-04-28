@@ -22,7 +22,76 @@
     </header>
 
     <section class="p-3  ">
-      <a name="iuthentication"></a>
+      <a name="ssl"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 7
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">SSL сертификат на Open Server, простой сайт и фреймворк с защищенным соединением https на Опен Сервер</h5>
+          <p class="card-text">
+            В видео рассказывается об установке SSL сертификата для создания защищенного соединения https на Open Server которое подойдет для тестирования работы сайтов и пр.
+Установим ssl сертификат на простой сайт и фреймворк Laravel 10.<br>
+            <hr/></p>
+<pre>
+Использовано в видео:
+ssl // в C:\OSPanel\ создаем папку ssl
+start.bat config.txt // создаем два файла в папке
+///////////////////////////////////файл start.bat
+@echo off
+set OPENSSL_CONF=c:\OSPanel\modules\http\Apache_2.4-PHP_8.0-8.1\conf\openssl.cnf
+c:\OSPanel\modules\http\Apache_2.4-PHP_8.0-8.1\bin\openssl req -x509 -sha256 -newkey rsa:2048 -nodes -days 5475 -keyout rootCA.key -out rootCA.crt -subj "/CN=OSPanel/"
+c:\OSPanel\modules\http\Apache_2.4-PHP_8.0-8.1\bin\openssl req -newkey rsa:2048 -nodes -days 5475 -keyout server.key -out server.csr -subj "/CN=PhpStorm/"
+c:\OSPanel\modules\http\Apache_2.4-PHP_8.0-8.1\bin\openssl x509 -req -sha256 -days 5475 -in server.csr -extfile config.txt -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out server.crt
+///////////////////////////////////файл config.txt
+nsComment = "OSPanel Generated Certificate"
+basicConstraints = CA:false
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = trash   //правим только домен (trash) если необходимо
+//////////////////////////////////////////////////////
+запускаем файл start.bat
+появляются 5 файлов сертификатов
+В папке с файлами запускаем файл rootCA.crt
+жмем установить сертификат
+локальный компьютер
+Доверенные коренные центры сертификации.
+///////////////////////////
+C:\OSPanel\userdata\config  // идем в папку
+Apache_2.4-PHP_8.0-8.1_vhost.conf // правим файл
+//////////////////////////////Apache_2.4-PHP_8.0-8.1_vhost.conf в файле правим пути
+SSLCertificateFile "%sprogdir%/ssl/server.crt"
+SSLCertificateKeyFile "%sprogdir%/ssl/server.key"
+/////////////////////////
+Перезапускаем опен сервер и возможно браузер.
+/////////////////////////
+В файле config.txt можно указать несколько доменов
+DNS.1 = trash
+DNS.2 = trash.net
+DNS.3 = demo
+DNS.4 = demo.com
+
+</pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 29 апреля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://www.youtube.com/watch?v=GwIPd-SvUxI">https://www.youtube.com/watch?v=GwIPd-SvUxI</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+    <section class="p-3  ">
+      <a name="queues"></a>
       <div class="card ">
         <div class="card-header">
           Видео номер 6
@@ -58,7 +127,7 @@ DB::table('users')->insertOrIgnore([ // В таблицу users вносим з�
         </div>
         <div class="card-footer text-muted">
           <p class="card-text"> загружен 22 апреля 2024г &nbsp &nbsp  ссылка на видео
-            <a href="https://www.youtube.com/watch?v=GwIPd-SvUxI">https://www.youtube.com/watch?v=GwIPd-SvUxI</a>
+            <a href="https://youtu.be/Mzbx5qwIY_0">https://youtu.be/Mzbx5qwIY_0</a>
           </p>
         </div>
       </div>
