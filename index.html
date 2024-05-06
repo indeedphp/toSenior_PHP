@@ -21,6 +21,69 @@
 
     </header>
 
+
+    <section class="p-3  ">
+      <a name="events"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 8
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">События и слушатели в Ларавел 10,  Events Listeners Laravel 10</h5>
+          <p class="card-text">
+            В видео рассказывается о событиях во фреймворке Ларавел 10 которые помогут при разработке сайта.<br>
+            <hr/></p>
+<pre>
+Использовано в видео:
+cd domains/demo // переходим в папку фреймворка
+php artisan make:event TestEvent  // создаем событие
+use App\Events\TestEvent;
+event(new TestEvent('привед медвед')); // в контроллере вызываем событие
+////////////// в событии создаем свойство и магический метод
+    public $text;
+    public function __construct($textController)
+    {
+       $this->text = $textController;
+       echo $this->text;
+    }
+//////////////
+php artisan make:listener TestEventListener --event=TestEvent //создаем слушателя
+////////////в провайдере прописываем событие и слушателя
+   TestEvent::class => [
+            TestEventListener::class,
+        ],
+////////////в провайдере меняем false на true
+  public function shouldDiscoverEvents(): bool
+    {
+        return true;
+    }
+////////////подключаем фасад базы
+use Illuminate\Support\Facades\DB;
+////////////
+            DB::table('users')->insertOrIgnore([
+            'name' => 'medved',
+            'email' => $event->text,
+            'password' => '12345678',
+        ]);
+
+</pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 06 мая 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://www.youtube.com/watch?v=3jn03GPwm74">https://www.youtube.com/watch?v=3jn03GPwm74</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
+
+
     <section class="p-3  ">
       <a name="ssl"></a>
       <div class="card ">
