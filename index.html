@@ -22,6 +22,85 @@
     </header>
 
 
+
+
+
+    <section class="p-3  ">
+      <a name="events"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 9
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Файловое хранилище в Ларавел 10, File Storage Laravel 10, сохраняем, выводим и скачиваем файлы</h5>
+          <p class="card-text">
+            В видео максимально просто и быстро рассказывается об способе сохранения файлов на том же сервере что и сам фреймворк Ларавел, так же выведем файл на страницу и сделаем ссылку для загрузки файла обратно на пк.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+cd domains/demo // переходим в папку фреймворка
+/////////////////////Код для блейда
+<!doctype html>
+  <html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>test</title>
+  </head>
+  <body>
+    <form class="m-5"  action="{{route('create')}}" method="post" enctype="multipart/form-data">
+      @csrf
+      <input type="file" name="image">
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+  </body>
+  </html>
+////////////////////////////Для блейда добавляем вывод и загрузку
+  <img src="public/Br3FzUOqtEWytgl0kIjaxXVYhBVRiZI0MaFiLsJm.jpg" width="250" alt="lorem"></br>
+  <a href="{{route('download')}}">загрузить себе</a>
+//////////////////////////роуты
+Route::get('/', [IndexController::class, 'view'])->name('view');
+Route::post('/', [IndexController::class, 'create'])->name('create');
+Route::get('/download', [IndexController::class, 'download'])->name('download');
+//////////////////////////Контроллер
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+class IndexController extends Controller
+{
+    public function view(Request $request)
+    {
+       return view('index');
+   }
+   public function create(Request $request)
+   {
+     $image = $request->file('image');
+     $path = Storage::putFile('public', $image);
+     return view('index');
+  }
+  public function download(Request $request)
+  {
+   return Storage::download('public/Br3FzUOqtEWytgl0kIjaxXVYhBVRiZI0MaFiLsJm.jpg');
+}
+}
+
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 13 мая 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/mtxV96bM4co">https://youtu.be/mtxV96bM4co</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
     <section class="p-3  ">
       <a name="events"></a>
       <div class="card ">
@@ -33,7 +112,7 @@
           <p class="card-text">
             В видео рассказывается о событиях во фреймворке Ларавел 10 которые помогут при разработке сайта.<br>
             <hr/></p>
-<pre>
+<pre><xmp>
 Использовано в видео:
 cd domains/demo // переходим в папку фреймворка
 php artisan make:event TestEvent  // создаем событие
@@ -66,7 +145,7 @@ use Illuminate\Support\Facades\DB;
             'password' => '12345678',
         ]);
 
-</pre>
+</xmp></pre>
 
         </div>
         <div class="card-footer text-muted">
