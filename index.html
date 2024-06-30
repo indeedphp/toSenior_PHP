@@ -23,10 +23,102 @@
 
 
 
+    <section class="p-3  ">
+      <a name="storage2"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 10
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Amazon S3 AWS хранилище в Ларавел 10, Amazon S3  Laravel 10, сохраняем, выводим и скачиваем файлы</h5>
+          <p class="card-text">
+         В данном видео продолжим работать с хранилищем Ларавел, но теперь будем сохранять файлы в облаке Amazon S3 , так же сделаем вывод файлов на сайт и скачивание файлов к себе на компьютер с сайта, все будет показано максимально просто и без воды.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+cd domains/storage // переходим в папку фреймворка
+composer require league/flysystem-aws-s3-v3 "^3.0" --with-all-dependencies // устанавливаем пакет для S3
+/////////////////////ENV файл
+FILESYSTEM_DISK=s3
+
+AWS_ACCESS_KEY_ID=(вставляем короткий код хранилища без скобок)
+AWS_SECRET_ACCESS_KEY=(вставляем длинный код хранилища без скобок)
+AWS_DEFAULT_REGION=us-east-1 // сервер хранилища (регион)
+AWS_BUCKET=toseniorphp  // ведро внутри хранилища
+AWS_USE_PATH_STYLE_ENDPOINT=true
+//////////////////////меняем в config/filesystems.php
+'default' => env('FILESYSTEM_DISK', 's3'),
+'visibility' => 'public',  // добавляем в массив s3 строка для публичности файлов
+/////////////////////Код для блейда
+<!doctype html>
+  <html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>test</title>
+  </head>
+  <body>
+    <form class="m-5"  action="{{route('create')}}" method="post" enctype="multipart/form-data">
+      @csrf
+      <input type="file" name="image">
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+      @foreach ($files as $file)
+    </br>
+    <img src="https://toseniorphp.s3.amazonaws.com/{{$file}}" width="250" alt="lorem">
+  </br>
+  <a href="{{route('download', ['path' => $file])}}">загрузить себе</a>
+@endforeach
+  </body>
+  </html>
+//////////////////////////роуты
+Route::get('/', [IndexController::class, 'view'])->name('view');
+Route::post('/', [IndexController::class, 'create'])->name('create');
+Route::get('/download', [IndexController::class, 'download'])->name('download');
+//////////////////////////Контроллер
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+class IndexController extends Controller
+{
+    public function view(Request $request)
+    {
+       $files = Storage::files('/public');
+        return view('index',compact('files'));
+   }
+   public function create(Request $request)
+   {
+     $image = $request->file('image');
+     $path = Storage::putFile('public', $image);
+     return view('index');
+  }
+  public function download(Request $request)
+  {
+   $path = $request->get('path');
+   return Storage::download($path);
+}
+}
+
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 30 июня 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/U6cUtD9hE-k">https://youtu.be/U6cUtD9hE-k</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
 
 
     <section class="p-3  ">
-      <a name="events"></a>
+      <a name="storage"></a>
       <div class="card ">
         <div class="card-header">
           Видео номер 9
