@@ -21,7 +21,162 @@
 
     </header>
 
+    <section class="p-3  ">
+      <a name="AJAX"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 11
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Ларавел 10 и  JS AJAX  работаем асинхронно получаем лайки и сохраняем в базе SQlite</h5>
+          <p class="card-text">
+         В данном видео продолжим работать с хранилищем Ларавел, но теперь будем сохранять файлы в облаке Amazon S3 , так же сделаем вывод файлов на сайт и скачивание файлов к себе на компьютер с сайта, все будет показано максимально просто и без воды.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+cd domains/ajax // переходим в папку фреймворка
+php artisan make:model Like --migration // создаем миграцию для таблицы лайк и модель к ней
+php artisan migrate  // запускаем миграции
+php artisan make:controller LikeController // создаем контроллер
+/////////////////////ENV файл
+DB_CONNECTION=sqlite  // настраиваем подключение к базе sqlite
+/////////////////////Код для блейда
+<!doctype html>
+  <html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <link rel="shortcut icon"href="favicon.ico">
+    <title>AJAX</title>
+  </head>
+  <body>
 
+    <h1>Название поста</h1>
+    <hr>
+    <h3>Заголовок</h3>
+    <hr>
+    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
+    <hr>
+    <button id=butlike>like</button> &nbsp &nbsp
+    <nobr id=like>4</nobr> &nbsp &nbsp
+    <button id=butdislike>dislike</button> &nbsp &nbsp
+    <nobr id=dislike>2</nobr>
+
+    <script>
+let flagl = 0;
+let flagd = 0;
+let like = document.querySelector('#like');
+let dislike = document.querySelector('#dislike');
+let butlike = document.querySelector('#butlike');
+butlike.addEventListener('click', function() {
+  switch(flagl){
+case 0:
+if(flagd == 1){
+  dislike.textContent--;
+  flagd = 0;
+}
+like.textContent++;
+flagl = 1;
+fetch('/likes/?post=25&user=bob&like=1&dislike=0');
+break;
+
+case 1:
+like.textContent--;
+flagl = 0;
+fetch('/likes/?post=25&user=bob&like=0&dislike=0');
+break;
+
+}
+});
+
+let butdislike = document.querySelector('#butdislike');
+butdislike.addEventListener('click', function() {
+  switch(flagd){
+case 0:
+if(flagl == 1){
+  like.textContent--;
+  flagl = 0;
+}
+dislike.textContent++;
+flagd = 1;
+fetch('/likes/?post=25&user=bob&like=0&dislike=1');
+break;
+
+case 1:
+dislike.textContent--;
+flagd = 0;
+fetch('/likes/?post=25&user=bob&like=0&dislike=0');
+break;
+}
+});
+    </script>
+  </body>
+  </html>
+//////////////////////////роуты
+Route::get('/', [LikeController::class, 'view'])->name('view');
+Route::get('/likes', [LikeController::class, 'likes'])->name('likes');
+// Route::get('/likes/{post?}/{user?}/{like?}/{dislike?}', [LikeController::class, 'likes'])->name('likes');
+//////////////////////////Контроллер
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Like;
+
+class LikeController extends Controller
+{
+    public function view(Request $request)
+    {
+       return view('index');
+   }
+   public function likes(Request $request)
+   {
+    $likes = Like::where('post', 25)->first();
+    // info($request->get());
+    if(empty($likes)){
+    Like::create($request->only(['post','user','like','dislike']));
+    }
+    else{
+        $likes->update($request->only(['like','dislike']));
+    }
+}
+}
+/////////////////////////////////////////модель
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+class Like extends Model
+{
+    use HasFactory;
+
+       protected $fillable = [
+        'post',
+        'like',
+        'dislike',
+        'user',
+    ];
+}
+//////////////////////////////////разное
+public function likes($post,$user,$like,$dislike)
+    Like::create([
+    'post' => $post,
+    'user' => $user,
+    'like' => $like,
+    'dislike' => $dislike,
+]);
+fetch("{{route('likes', ['25', '2', '5', '8'])}}");
+"{{route('likes', ['post' => '25', 'user' => 'bob', 'like' => '1', 'dislike' => '0'])}}"
+//////////////////////////////////
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 30 июня 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/U6cUtD9hE-k">https://youtu.be/U6cUtD9hE-k</a>
+          </p>
+        </div>
+      </div>
+    </section>
 
     <section class="p-3  ">
       <a name="storage2"></a>
@@ -104,8 +259,8 @@ class IndexController extends Controller
 
         </div>
         <div class="card-footer text-muted">
-          <p class="card-text"> загружен 30 июня 2024г &nbsp &nbsp  ссылка на видео
-            <a href="https://youtu.be/U6cUtD9hE-k">https://youtu.be/U6cUtD9hE-k</a>
+          <p class="card-text"> загружен 8 июля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/8GYM3BCV0jQ">https://youtu.be/8GYM3BCV0jQ</a>
           </p>
         </div>
       </div>
