@@ -21,6 +21,95 @@
 
     </header>
 
+
+<!-- ================================================================================================== -->
+
+
+    <section class="p-3  ">
+      <a name="unit"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 12
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Юнит и интеграционные тесты Ларавел 10, настраиваем базу, работаем с  фабрикой и сидерами.</h5>
+          <p class="card-text">
+        Поговорим об юнит и интеграционных тестах в Ларавел 10, посмотрим на примерах из обычной жизни чем они отличаются, проверим метод. Затем подключим тестовую и обычную базу данных, запишем в нее данные из фабрики и сидеров.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\unit // переходим в проект
+php artisan make:test UserTest  // создание функционального теста (Feature)
+php artisan make:test UserTest --unit  // создание юнит теста
+php artisan test // запуск всех тестов
+php artisan make:controller UserController  // создание контроллера
+php artisan migrate // запускаем миграции
+============================================================
+В юнит тесте
+------------------------------------------------------------
+use App\Http\Controllers\UserController;  // подключаем контроллер
+class UserTest extends TestCase
+{
+    public function test_example(): void
+    {
+         $expected = 15;  // ожидаемый
+         $number = 10;
+         $UserController = new UserController;
+         $sum = $UserController->plus($number);
+         $this->assertEquals($expected, $sum);  // сравниваем
+    }
+}
+============================================================
+В контроллере
+------------------------------------------------------------
+class UserController extends Controller
+{
+         public function plus($number)
+    {
+        $numberPlus = $number + 5;
+       return $numberPlus;
+   }
+}
+============================================================
+В интеграционном тесте
+------------------------------------------------------------
+use App\Models\User;  // подключаем модель
+class UserDbTest extends TestCase
+{
+    use RefreshDatabase;
+  public function test_example(): void
+  {
+     $user = User::factory()->create([  // создаем фейковую запись через фабрику
+      'name'=> 'bob'
+   ]);
+     $likes = User::where('name', 'bob')->first();  // берем запись из базы с именем
+     // file_put_contents('file.txt', $likes->name);
+     $this->assertEquals('bob', $likes->name) ;  // проверяем на соответствие
+  }
+}
+============================================================
+Разное
+------------------------------------------------------------
+.env.testing  // файл с настройками для тестирования
+protected $seed = true;  // добавляем свойства в класс TestCase для сидеров
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 14 июля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/VKxSgfllj2I">https://youtu.be/VKxSgfllj2I</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+<!-- ================================================================================================== -->
+
+
     <section class="p-3  ">
       <a name="AJAX"></a>
       <div class="card ">
@@ -171,12 +260,16 @@ fetch("{{route('likes', ['25', '2', '5', '8'])}}");
 
         </div>
         <div class="card-footer text-muted">
-          <p class="card-text"> загружен 30 июня 2024г &nbsp &nbsp  ссылка на видео
+          <p class="card-text"> загружен 7 июля 2024г &nbsp &nbsp  ссылка на видео
             <a href="https://youtu.be/U6cUtD9hE-k">https://youtu.be/U6cUtD9hE-k</a>
           </p>
         </div>
       </div>
     </section>
+
+
+<!-- ================================================================================================== -->
+
 
     <section class="p-3  ">
       <a name="storage2"></a>
@@ -259,7 +352,7 @@ class IndexController extends Controller
 
         </div>
         <div class="card-footer text-muted">
-          <p class="card-text"> загружен 8 июля 2024г &nbsp &nbsp  ссылка на видео
+          <p class="card-text"> загружен 30 июня 2024г &nbsp &nbsp  ссылка на видео
             <a href="https://youtu.be/8GYM3BCV0jQ">https://youtu.be/8GYM3BCV0jQ</a>
           </p>
         </div>
@@ -268,7 +361,7 @@ class IndexController extends Controller
 
 
 
-
+<!-- ================================================================================================== -->
 
 
 
@@ -345,7 +438,7 @@ class IndexController extends Controller
 
 
 
-
+<!-- ================================================================================================== -->
 
 
     <section class="p-3  ">
