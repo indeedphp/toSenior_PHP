@@ -21,6 +21,127 @@
 
     </header>
 
+<!-- ================================================================================================== -->
+    <section class="p-3  ">
+      <a name="auth"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 13
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Простая регистрация, вход и выход в Laravel 10, аутентификация, авторизация Ларавел 10</h5>
+          <p class="card-text">
+      В видео сделаем простейшую регистрацию вход и выход на сайте для того чтоб разобраться с технологией и применять если необходимо в начале нового проекта.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\login // переходим в проект
+php artisan migrate // запускаем миграции
+php artisan make:view login  // создаем вьюшку для входа
+php artisan make:view register // создаем вьюшку для регистрации
+php artisan make:view home  // создаем вьюшку для главной страницы
+php artisan make:controller LoginController  // создание контроллера
+============================================================
+В роутах
+------------------------------------------------------------
+use App\Http\Controllers\LoginController;  // подключаем контроллер
+
+Route::get('home', function () {
+    return view('home');
+});
+Route::get('/login', [LoginController::class, 'login'])->name('login');
+Route::get('/register', [LoginController::class, 'register'])->name('register');
+
+Route::post('/login', [LoginController::class, 'authentication'])->name('authentication');
+Route::post('/register', [LoginController::class, 'registerCreate'])->name('registerCreate');
+
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+============================================================
+В контроллере
+------------------------------------------------------------
+use Illuminate\Support\Facades\Auth;  // подключаем фасад авторизации
+use App\Models\User;  // подключаем модель
+
+class LoginController extends Controller
+{
+
+       public function register(Request $request){
+        return view('register');
+    }
+
+        public function login(Request $request){
+        return view('login');
+    }
+
+        public function registerCreate(Request $request)
+    {
+        User::create($request->only(['email','password','name']));
+        return redirect('login');
+    }
+
+    public function authentication(Request $request)
+    {
+        $arr = $request->only(['email','password']);
+        Auth::attempt($arr);
+        return redirect('home');
+    }
+
+        public function logout(Request $request){
+        Auth::logout();
+        return redirect('home');
+    }
+
+}
+============================================================
+В вюшке login
+------------------------------------------------------------
+<form method="POST" action="{{ route('authentication') }}">
+    @csrf
+    <label>Email</label>
+    <input type="email" name="email" value="">
+    <label>Пароль</label>
+    <input type="password" name="password" value="">
+    <button type="submit">отправить</button>
+</form>
+============================================================
+В вюшке register
+------------------------------------------------------------
+<form method="POST" action="{{ route('registerCreate') }}">
+    @csrf
+    <label>name</label>
+    <input type="text" name="name" value="">
+    <label>Email</label>
+    <input type="email" name="email" value="">
+    <label>Пароль</label>
+    <input type="password" name="password" value="">
+    <button type="submit">отправить</button>
+</form>
+============================================================
+В вюшке home
+------------------------------------------------------------
+<p>Главная страница </p>
+@auth
+<p>Привествуем! {{Auth::user()->name}}</p>
+<p><a href="{{ route('logout') }}" >logout</a></p>
+@else
+<p><a href="{{ route('login') }}" >Login</a></p>
+<p><a href="{{ route('register') }}" >Register</a></p>
+@endauth
+============================================================
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 21 июля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/KI5VxSNtWLk">https://youtu.be/KI5VxSNtWLk</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
 
 <!-- ================================================================================================== -->
 
@@ -79,7 +200,7 @@ class UserController extends Controller
 use App\Models\User;  // подключаем модель
 class UserDbTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase; // подключаем трейт очистки базы
   public function test_example(): void
   {
      $user = User::factory()->create([  // создаем фейковую запись через фабрику
