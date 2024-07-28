@@ -21,6 +21,125 @@
 
     </header>
 
+
+<!-- ================================================================================================== -->
+    <section class="p-3  ">
+      <a name="not"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 14
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Уведомления в Ларавел 10, notification Laravel 10</h5>
+          <p class="card-text">
+      Максимально быстро и доступно поработаем с нотификациями в Ларавел 10. Будем сохранять нотификации в базу, помечать просмотренные, выводить и удалять из базы.<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\notification // переходим в проект
+php artisan make:notification UserNotification  // команда создание нотификации
+php artisan notifications:table  // создаем таблицу в базе для нотификации
+php artisan migrate  // накатываем миграции
+php artisan make:controller UserController  // создаем контроллер
+------------------------------------------------------------
+php artisan tinker   // запускаем тинкер
+User::factory()->count(2)->create()  // создаем 2 фейковых юзера
+exit  // выход из тинкера
+==================================================
+В файле нотификации UserNotification до работы с контроллером
+------------------------------------------------------------
+public function via(object $notifiable): array   {  // в методе указываем что работаем с базой данных
+  return ['database'];
+}
+------------------------------------------------------------
+public function toArray(): array {  // то что полетит в базу
+    return [  'message'   =>  'prived medved'  ];
+}
+------------------------------------------------------------
+В файле нотификации UserNotification работаем с контроллером
+------------------------------------------------------------
+public $text;
+public function __construct($textController)
+{
+    $this->text = $textController;
+}
+public function via(): array
+{
+    return ['database'];
+}
+public function toArray(): array
+{
+    return ['message'   =>  $this->text ];
+}
+============================================================
+В роуте работаем без контроллера
+------------------------------------------------------------
+Route::get('/not', function () {
+    $user = App\Models\User::find(2);
+    $user->notify(new App\Notifications\UserNotification());
+    return view('welcome');
+});
+------------------------------------------------------------
+В роуте работаем с контроллером
+------------------------------------------------------------
+use App\Http\Controllers\UserController;  // подключаем контроллер
+Route::get('/not', [UserController::class, 'not']);  // создаем нотификации
+Route::get('/notv', [UserController::class, 'notView']);  // показываем нотификации
+Route::get('/notd', [UserController::class, 'notDel']);  // удаляем нотификации
+============================================================
+В контроллере
+------------------------------------------------------------
+use Illuminate\Support\Facades\Notification; // подключаем фасад нотификаций
+use App\Notifications\UserNotification;  // подключаем нотификацию
+use App\Models\User;  // подключаем модель
+
+    public function not()  // юзеру с ид 2 создаем нотификацию
+    {
+        $user = User::find(2);
+        Notification::send($user, new UserNotification('privet user'));
+        return view('welcome');
+    }
+    public function notView()  // выводим все новые нотификации
+    {
+        $user = User::find(2);
+        foreach ($user->unreadNotifications as $notification) {
+            print_r($notification->data);
+            $notification->markAsRead();  // помечаем нотификации что они просмотрены
+            echo '<br>';
+        }
+        return view('welcome');
+    }
+    public function notDel()  // удаляем все нотификации
+    {
+        $user = User::find(2);
+        $user->notifications()->delete();
+        return view('welcome');
+    }
+============================================================
+разное
+------------------------------------------------------------
+foreach ($user->notifications as $notification) // перебираем все нотификации, а не только просмотренные
+use Notifiable;  // в модели должен быть подключен трейт
+$user->unreadNotifications->markAsRead();  // помечаем всех кто есть в базе как обработанных
+$user->unreadNotifications()->update(['read_at' => now()]);  // то же только запросов меньше в базу
+============================================================
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 28 июля 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/lEkXWzfPQF0">https://youtu.be/lEkXWzfPQF0</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
 <!-- ================================================================================================== -->
     <section class="p-3  ">
       <a name="auth"></a>
