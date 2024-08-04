@@ -22,6 +22,131 @@
     </header>
 
 
+
+<!-- ================================================================================================== -->
+    <section class="p-3  ">
+      <a name="resource"></a>
+      <div class="card ">
+        <div class="card-header">
+          Видео номер 15
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">API на Ларавел 10 + ресурсы, API & Resourse Laravel 10</h5>
+          <p class="card-text">
+      В видео сделаем самое простое API на Ларавел 10, затем усложним, поработаем с базой данных, а так же с Ресурсом (очень удобный обработчик апи).<br>
+            <hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\resourse // переходим в проект
+php artisan migrate // накатываем миграции
+php artisan db:seed  // накатываем сиды (заполняем базу фейковыми данными)
+php artisan make:resource UserResource  // создаем ресурс
+php artisan make:resource UserResourceCollection // ресурс работающий с метаданными
+php artisan make:controller ApiController  // создаем контроллер
+============================================================
+В API роутах
+------------------------------------------------------------
+Route::get('/', function () { // простешее апи из массива
+    return ['user' => 'bob'];
+});
+------------------------------------------------------------
+Route::get('/', function () {  // апи, из базы берем все
+    return App\Models\User::all();
+});
+------------------------------------------------------------
+Route::get('/{id}', function (string $id) {  // апи берем выборочно из базы
+    return App\Models\User::find($id);
+});
+------------------------------------------------------------
+use App\Http\Controllers\ApiController;  // подключаем контроллер
+Route::get('/', [ApiController::class, 'api']); // работаем через контроллер
+============================================================
+В контроллере
+------------------------------------------------------------
+use App\Models\User;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\UserResourceCollection;
+------------------------------------------------------------
+public function api()  // выводим всех юзеров но только с колонками name email
+{
+    $user = User::all('name', 'email');
+    return $user;
+}
+------------------------------------------------------------
+public function api()  // обрабатываем ответ апи в цикле
+{
+    $users = User::all();
+    foreach ($users as $user) {
+        $arr[$user->id] = [$user->name,$user->email];
+    }
+    return $arr;
+}
+------------------------------------------------------------
+public function api()  // Работаем через ресурс без обработки или с отдельным обЪектом
+{
+    return new UserResource(User::all());
+}
+------------------------------------------------------------
+public function api()  // работаем через ресурс где обрабатываем коллекцию
+{
+    return UserResource::collection(User::all());
+}
+------------------------------------------------------------
+public function api()  // работаем с UserResourceCollection для мета данных
+{
+return new UserResourceCollection(User::all());
+}
+============================================================
+В ресурсах UserResource
+------------------------------------------------------------
+public function toArray(Request $request): array
+{
+    return [
+        'idNew' => $this->id,  // выбираем какие колонки нужны имя ключей и пр.
+        'nameText' => $this->name,
+        'emailMail' => $this->email,
+    ];
+}
+============================================================
+В ресурсах UserResourceCollection
+------------------------------------------------------------
+public function toArray(Request $request): array
+{
+    return [
+        'meta' => [  // ставим метаданные различные
+            'if' => $this->when(1 == 1, function(){return 'ok';}),  // работаем с условием
+            'time' => now(),  // время
+            'test' => 'prived medved',  // текст
+        ],
+        'data' => $this->collection,  // выводим коллекцию можно снизу или сверху
+    ];
+}
+============================================================
+разное
+------------------------------------------------------------
+use Illuminate\Http\Resources\Json\JsonResource; // в AppServiceProvider поключаем для работы с апи
+JsonResource::withoutWrapping(); // удаляем обертку апи
+JsonResource::wrap('test');  // делаем глобальную обертку
+------------------------------------------------------------
+public static $wrap = 'user';  // если необходимо переименовать обертку в ресурсе
+============================================================
+</xmp></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+          <p class="card-text"> загружен 04 августа 2024г &nbsp &nbsp  ссылка на видео
+            <a href="https://youtu.be/7q2VlHWjvKw">https://youtu.be/7q2VlHWjvKw</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+
 <!-- ================================================================================================== -->
     <section class="p-3  ">
       <a name="not"></a>
