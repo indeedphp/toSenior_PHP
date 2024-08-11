@@ -16,6 +16,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#vue">№16 Ларавел 10 + Vue.js</option>
     <option VALUE="index.html#resource">№15 API на Ларавел 10 + ресурсы</option>
     <option VALUE="index.html#notific">№14 Уведомления в Ларавел 10</option>
     <option VALUE="index.html#auth">№13 Регистрация вход, выход Laravel 10</option>
@@ -38,7 +39,168 @@
 </header>
 
 
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="vue"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 16
+</div>
+<div class="card-body">
+<h5 class="card-title">Laravel 10 + VUE.JS, подключаем, разбираемся, пробуем основы. Ларавел10 + ВЬЮ</h5>
+<p class="card-text">
+В видео к фреймворку Ларавел 10 подключаем фреймворк для фронтэнда VUE.JS. Смотрим как работает сборщик VITE как сделать настройки, и произвести базовые действия такие как вывод, перебор, условие и AJAX запрос с сохранением в базу. Также минимально поработаем с  CSS.<br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\vue //переходим в проект
+node --version  // проверяем версию ноды, если нет то устанавливаем
+npm --version  // проверяем версию npm
+npm install   // проводим активацию, в проекте появляется папка ноды
+npm i @vitejs/plugin-vue  // устанавливаем VUI
+npm run build  // проводим сборку
+npm run dev  // запускаем сборщика
+npm i axios  // установка библиотеки axios
+php artisan migrate // накатываем миграции
+php artisan make:controller IndexController  // создаем контроллер
+============================================================
+В файле vite.config.js
+------------------------------------------------------------
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue'
+export default defineConfig({
+plugins: [
+vue(),
+laravel({
+input: [
+'resources/css/app.css',
+'resources/js/app.js',
+],
+refresh: true,
+}),
+],
+});
+============================================================
+В файле app.js
+------------------------------------------------------------
+import './bootstrap';
+import { createApp } from 'vue/dist/vue.esm-bundler';
+import test from './test.vue';
+createApp(test).mount('#app');
+============================================================
+В файле welcome.blade.php
+------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>vue</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body>
+    <div id="app"></div>
+</body>
+</html>
+============================================================
+В файле test.vue
+------------------------------------------------------------
+<template>
+<h1 className="text">hello</h1>
+<h1>{{text}}</h1>
+<button type="button" @click="this.text = 'текст для заливки в переменную'" >Кнопка</button>
+<button type="button" @click="getStart()" >Кнопка2</button>
+<input type="text" v-model="text" name="name">
+<h1 v-if="false">1 Выводим получая true</h1>
+<h1 v-else-if="1==3">2 Выводим если это true</h1>
+<h1 v-else>3 Выводим если не true</h1>
+<div v-for="(el) in users">
+    <p>{{el}}</p>
+</div>
+</template>
 
+<script>
+    export default {
+        data(){
+            return {
+                text: "текст из перемен",
+                users: ['1user', '2user', '3user']
+            }
+        },
+        methods:{
+            inputText(){
+                this.text = "через функцию меняем текст"
+            },
+          getStart(){
+            axios.post('/base', { email: 'bob2@bob.bob', password: '12345678' , name: 'bob'});
+            }
+        }
+        }
+</script>
+
+<style scoped>
+h1{
+    color:rgb(23, 1, 250)
+}
+.text{
+    color:rgb(231, 27, 37)
+}
+</style>
+------------------------------------------------------------
+axios.get('https://api.nationalize.io/?name=nathaniel', { headers: {'Access-Control-Allow-Origin': null,  // обходим CORS
+'Access-Control-Allow-Headers': null, 'x-requested-with': null,} } ).then(function (response) {console.log(response);});
+------------------------------------------------------------
+axios.get('https://catfact.ninja/fact').then(response => (this.ax = response));  // работаем с апи
+------------------------------------------------------------
+axios.get('/base/?email=bob@bob.bob&password=12345678&name=bob'); // отправляем гет запрос с данными
+============================================================
+В роуте
+------------------------------------------------------------
+use App\Http\Controllers\IndexController;  // подключаем контроллер
+------------------------------------------------------------
+Route::get('/base', [IndexController::class, 'base']);
+Route::post('/base', [IndexController::class, 'base2']);
+============================================================
+В контроллере
+------------------------------------------------------------
+use App\Models\User; // подключаем модель
+------------------------------------------------------------
+class IndexController extends Controller
+{
+    public static function base(Request $request)
+    {
+        User::create($request->only(['email','password','name']));
+        return view('welcome');
+    }
+    public static function base2(Request $request)
+    {
+        User::create($request->only(['email','password','name']));
+        return view('welcome');
+    }
+}
+============================================================
+В файле app.css
+------------------------------------------------------------
+body{ background: rgb(3, 71, 44);}
+============================================================
+Разное
+------------------------------------------------------------
+https://catfact.ninja/fact  // апи простой для тестов
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 11 августа 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/uWscpMgICbk">https://youtu.be/uWscpMgICbk</a>
+</p>
+</div>
+</div>
+</section>
 
 
 
