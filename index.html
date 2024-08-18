@@ -16,6 +16,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#pusher">№17 WebSocket Pusher говнокод</option>
     <option VALUE="index.html#vue">№16 Ларавел 10 + Vue.js</option>
     <option VALUE="index.html#resource">№15 API на Ларавел 10 + ресурсы</option>
     <option VALUE="index.html#notific">№14 Уведомления в Ларавел 10</option>
@@ -37,6 +38,156 @@
 </div>
 </div>
 </header>
+
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="pusher"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 17
+</div>
+<div class="card-body">
+<h5 class="card-title">WebSocket. Отправляем из консоли Pusher сообщения, получаем на сайте, отправляем с сайта и Postman</h5>
+<p class="card-text">
+В данном видео с простыми примерами знакомимся с веб сокетом, регистрируемся на Pusher , создаем канал, отправляем и принимаем сообщения в консоль Pusher , получаем сообщения на простой страничке с тремя строками JavaScript, далее отправляем сообщения на сайте написанном на PHP с 10 строками кода, так же разберемся немного с документацией и консолью WebSocket, ну и напишем немного говнокода :)<br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В index.html JS код
+------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web</title>
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+</head>
+<body>
+<script>
+var pusher = new Pusher("Введите key", {cluster: "Введите cluster",});
+var channel = pusher.subscribe("Введите название канала");
+channel.bind("Введите название события", (data) => {console.log(data)});
+</script>
+</body>
+</html>
+============================================================
+В файле index.php PHP код
+------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon"href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pusherApiTest</title>
+</head>
+<body>
+ <form action="" method="POST">
+  <p> Введите cluster </p>
+  <input type="text" name="cluster" value="<?php if (isset($_POST['cluster'])) echo $_POST['cluster'] ?>">
+  <p> Введите app_id </p>
+  <input type="text" name="app_id" value="<?php if (isset($_POST['app_id'])) echo $_POST['app_id'] ?>">
+  <p> Введите key </p>
+  <input type="text" name="key" value="<?php if (isset($_POST['key'])) echo $_POST['key'] ?>">
+  <p> Введите secret </p>
+  <input type="text" name="secret" value="<?php if (isset($_POST['secret'])) echo $_POST['secret'] ?>">
+  <p> Введите название события </p>
+  <input type="text" name="event" value="<?php if (isset($_POST['event'])) echo $_POST['event'] ?>">
+  <p> Введите название канала </p>
+  <input type="text" name="channels" value="<?php if (isset($_POST['channels'])) echo $_POST['channels'] ?>">
+  <p> Введите сообщение </p>
+  <input type="text" name="data" value="<?php if (isset($_POST['data'])) echo $_POST['data'] ?>">
+  <p></p>
+  <input type="submit" name="formS" value="Отправим запрос" >
+</form>
+<?php
+if(!empty($_POST ["cluster"])){    $cluster = $_POST ["cluster"];
+if(!empty($_POST ["app_id"])){     $app_id = $_POST ["app_id"];
+if(!empty($_POST ["key"])){        $key = $_POST ["key"];
+if(!empty($_POST ["secret"])){     $secret = $_POST ["secret"];
+if(!empty($_POST ["event"])){      $event = $_POST ["event"];
+if(!empty($_POST ["channels"])){   $channels = $_POST ["channels"];
+if(!empty($_POST ["data"])){       $data = $_POST ["data"];
+$body = '{"name":"'.$event.'","channels":["'.$channels.'"],"data":"'.$data.'"}';
+$auth_timestamp = time();
+$auth_version = '1.0';
+$body_md5 = md5($body);
+$string_to_sign =
+"POST\n/apps/" . $app_id .
+"/events\nauth_key=" . $key .
+"&auth_timestamp=". $auth_timestamp .
+"&auth_version=" . $auth_version .
+"&body_md5=" . $body_md5;
+$auth_signature = hash_hmac('sha256', $string_to_sign, $secret);
+$opts = array('http' =>
+  array(
+    'method'  => 'POST',
+    'header'  => "Content-Type: application/json\r\n",
+    'content' => $body,
+  )
+);
+$context  = stream_context_create($opts);
+$url = 'http://api-'.$cluster.
+'.pusher.com/apps/'.$app_id.
+'/events?auth_key='.$key.
+'&auth_timestamp='.$auth_timestamp.
+'&auth_version=1.0&body_md5='.$body_md5.
+'&auth_signature='.$auth_signature;
+$result = file_get_contents($url, false, $context);
+echo '<br>';
+echo '<b>POST</b>';
+echo '<br>';
+echo 'url '.'http://api-'.$cluster.'.pusher.com/apps/'.$app_id.'/events';
+echo '<br>';
+echo '<b>Params</b>';
+echo '<br>';
+echo 'auth_key '.$key;
+echo '<br>';
+echo 'auth_timestamp '.$auth_timestamp;
+echo '<br>';
+echo 'auth_version '.$auth_version;
+echo '<br>';
+echo 'body_md5 '.$body_md5;
+echo '<br>';
+echo 'auth_signature '.$auth_signature;
+echo '<br>';
+echo '<b>Headers</b>';
+echo '<br>';
+echo 'Content-Type application/json';
+echo '<br>';
+echo '<b>Body</b>';
+echo '<br>';
+echo $body;
+}}}}}}}
+?>
+</body>
+</html>
+============================================================
+Разное
+------------------------------------------------------------
+https://pusher.com/  Сайт Pusher
+https://github.com/indeedphp/pusherApiTest/blob/main/index.php Тест Pusher
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 18 августа 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/RdYRpLsZF04">https://youtu.be/RdYRpLsZF04</a>
+</p>
+</div>
+</div>
+</section>
+
+
+
+
+
+
 
 
 <!-- ================================================================================================== -->
@@ -190,6 +341,7 @@ body{ background: rgb(3, 71, 44);}
 Разное
 ------------------------------------------------------------
 https://catfact.ninja/fact  // апи простой для тестов
+https://www.youtube.com/@onecode_blog  // информация о подключении NODE.JS
 ============================================================
 </xmp></pre>
 
