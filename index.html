@@ -16,6 +16,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#lapusher">№18 Ларавел 10 + Pusher </option>
     <option VALUE="index.html#pusher">№17 WebSocket Pusher говнокод</option>
     <option VALUE="index.html#vue">№16 Ларавел 10 + Vue.js</option>
     <option VALUE="index.html#resource">№15 API на Ларавел 10 + ресурсы</option>
@@ -38,6 +39,177 @@
 </div>
 </div>
 </header>
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="lapusher"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 18
+</div>
+<div class="card-body">
+<h5 class="card-title">Laravel 10 & Pusher websocket , создаем чат без Node, Vue, Vite  и прочего.  Ларавел 10 и Пушер </h5>
+<p class="card-text">
+В видео простой способ работы фреймворка Laravel 10 и сервиса Pusher без различных пакетов которые не позволяют разобраться в работе WebSocket, поэтому упростим и будем внедрять :) <br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\pusher //переходим в проект
+php artisan migrate // накатываем миграции
+php artisan db:seed // накатываем сидеры
+php artisan make:view chat  // создаем страничку
+php artisan make:model Chat --migration  // создаем модель и миграцию для таблицы чат
+php artisan make:controller ChatController  // создаем контроллер
+============================================================
+В роуте
+------------------------------------------------------------
+use App\Http\Controllers\ChatController;
+------------------------------------------------------------
+Route::get('/', function () {
+    return view('welcome');
+});
+Route::get('/chat', [ChatController::class, 'chat'])->name('chat');
+Route::get('/api', [ChatController::class, 'api_pusher']);
+Route::get('/bob', function () {
+    auth()->loginUsingId(1);
+    return redirect()->route('chat');
+});
+Route::get('/ben', function () {
+    auth()->loginUsingId(2);
+    return redirect()->route('chat');
+});
+Route::get('/ken', function () {
+    auth()->loginUsingId(3);
+    return redirect()->route('chat');
+});
+============================================================
+Во вьюхе
+------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocketPusher</title>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+</head>
+<body>
+    @auth
+        <p>Привествуем! {{ Auth::user()->name }}</p>
+    @endauth
+    <input id="message">
+    <button name="button" id="button">Отправить</button>
+    <p>Все сообщения</p>
+    @isset($arr)
+        @foreach ($arr as $el)
+            <li>{{ $el['name']}}: {{ $el['data'] }}</li>
+        @endforeach
+    @endisset
+    <p>Новые сообщения</p>
+    <div id="list"></div>
+    <script>
+        let message = document.querySelector('#message');
+        let button = document.querySelector('#button');
+        let list = document.querySelector('#list');
+
+        var pusher = new Pusher("{{env('PUSHER_APP_KEY')}}", {
+            cluster: "{{env('PUSHER_APP_CLUSTER')}}",
+        });
+        var channel = pusher.subscribe("{{env('PUSHER_CHANEL')}}");
+        channel.bind("{{env('PUSHER_EVENT')}}", function(data) {
+            let li = document.createElement('li');
+            li.textContent = data;
+            list.appendChild(li);
+        });
+
+        button.addEventListener('click', function() {
+            fetch('/api/?data=' + message.value)
+        });
+    </script>
+</body>
+</html>
+============================================================
+В контроллере
+------------------------------------------------------------
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Chat;
+use App\Services\PusherServise;
+
+class ChatController extends Controller
+{
+    public function chat()
+    {
+        $arr = Chat::all();
+        return view('chat', compact('arr'));
+    }
+    public  function api_pusher(Request $request)
+    {
+        $name = Auth::user()->name;
+        $data = $request->data;
+        Chat::create(['name' => $name, 'data' => $data]);
+        (new PusherServise)->api_pusher_query($name, $data);
+    }
+}
+============================================================
+В сервисе
+------------------------------------------------------------
+<?php
+namespace App\Services;
+class PusherServise
+{
+    public  function api_pusher_query($name, $data)
+    {
+        $body = '{"name":"' . env('PUSHER_EVENT') . '","channels":["' . env('PUSHER_CHANEL') . '"],"data":"' . $name . ': ' . $data . '"}';
+        $auth_timestamp = time();
+        $auth_version = '1.0';
+        $body_md5 = md5($body);
+        $string_to_sign =
+            "POST\n/apps/" . env('PUSHER_APP_ID') .
+            "/events\nauth_key=" . env('PUSHER_APP_KEY') .
+            "&auth_timestamp=" . $auth_timestamp .
+            "&auth_version=" . $auth_version .
+            "&body_md5=" . $body_md5;
+        $auth_signature = hash_hmac('sha256', $string_to_sign, env('PUSHER_APP_SECRET'));
+        $opts = array(
+            'http' =>
+            array(
+                'method'  => 'POST',
+                'header'  => "Content-Type: application/json\r\n",
+                'content' => $body,
+            )
+        );
+        $context  = stream_context_create($opts);
+        $url = 'http://api-' . env('PUSHER_APP_CLUSTER') .
+            '.pusher.com/apps/' . env('PUSHER_APP_ID') .
+            '/events?auth_key=' . env('PUSHER_APP_KEY') .
+            '&auth_timestamp=' . $auth_timestamp .
+            '&auth_version=1.0&body_md5=' . $body_md5 .
+            '&auth_signature=' . $auth_signature;
+        file_get_contents($url, false, $context);
+    }
+}
+============================================================
+Разное
+------------------------------------------------------------
+https://pusher.com/  Сайт Pusher
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 26 августа 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/-L5VsgkBP8U">https://youtu.be/-L5VsgkBP8U</a>
+</p>
+</div>
+</div>
+</section>
 
 
 
@@ -101,8 +273,13 @@ channel.bind("Введите название события", (data) => {consol
   <input type="text" name="channels" value="<?php if (isset($_POST['channels'])) echo $_POST['channels'] ?>">
   <p> Введите сообщение </p>
   <input type="text" name="data" value="<?php if (isset($_POST['data'])) echo $_POST['data'] ?>">
-  <p></p>
-  <input type="submit" name="formS" value="Отправим запрос" >
+  <p>
+    <select name="choice">
+      <option value="1">Создать запрос с отправкой</option>
+      <option value="2">Создать запрос без отправки</option>
+    </select>
+  </p>
+  <input type="submit" name="formS" value="Выполнить">
 </form>
 <?php
 if(!empty($_POST ["cluster"])){    $cluster = $_POST ["cluster"];
@@ -112,6 +289,7 @@ if(!empty($_POST ["secret"])){     $secret = $_POST ["secret"];
 if(!empty($_POST ["event"])){      $event = $_POST ["event"];
 if(!empty($_POST ["channels"])){   $channels = $_POST ["channels"];
 if(!empty($_POST ["data"])){       $data = $_POST ["data"];
+if(!empty($_POST ["choice"])){     $choice = $_POST ["choice"];}
 $body = '{"name":"'.$event.'","channels":["'.$channels.'"],"data":"'.$data.'"}';
 $auth_timestamp = time();
 $auth_version = '1.0';
@@ -123,21 +301,23 @@ $string_to_sign =
 "&auth_version=" . $auth_version .
 "&body_md5=" . $body_md5;
 $auth_signature = hash_hmac('sha256', $string_to_sign, $secret);
-$opts = array('http' =>
-  array(
-    'method'  => 'POST',
-    'header'  => "Content-Type: application/json\r\n",
-    'content' => $body,
-  )
-);
-$context  = stream_context_create($opts);
-$url = 'http://api-'.$cluster.
-'.pusher.com/apps/'.$app_id.
-'/events?auth_key='.$key.
-'&auth_timestamp='.$auth_timestamp.
-'&auth_version=1.0&body_md5='.$body_md5.
-'&auth_signature='.$auth_signature;
-$result = file_get_contents($url, false, $context);
+if($choice == 1){
+  $opts = array('http' =>
+    array(
+      'method'  => 'POST',
+      'header'  => "Content-Type: application/json\r\n",
+      'content' => $body,
+    )
+  );
+  $context  = stream_context_create($opts);
+  $url = 'http://api-'.$cluster.
+  '.pusher.com/apps/'.$app_id.
+  '/events?auth_key='.$key.
+  '&auth_timestamp='.$auth_timestamp.
+  '&auth_version=1.0&body_md5='.$body_md5.
+  '&auth_signature='.$auth_signature;
+  $result = file_get_contents($url, false, $context);
+}
 echo '<br>';
 echo '<b>POST</b>';
 echo '<br>';
