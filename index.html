@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="shortcut icon"href="images/myicon.ico">
+<link rel="shortcut icon"href="favicon.ico">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <meta charset="utf-8">
 <title>toSenior_PHP</title>
 <link href="bootstrap.min.css" rel="stylesheet">
@@ -16,6 +17,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#pusher3">№19 Pusher + Ларавел 10 пакеты </option>
     <option VALUE="index.html#lapusher">№18 Ларавел 10 + Pusher </option>
     <option VALUE="index.html#pusher">№17 WebSocket Pusher говнокод</option>
     <option VALUE="index.html#vue">№16 Ларавел 10 + Vue.js</option>
@@ -40,6 +42,249 @@
 </div>
 </header>
 
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="pusher3"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 19
+</div>
+<div class="card-body">
+<h5 class="card-title">Pusher & Laravel 10 разбираем работу официальных пакетов PUSHER PHP SERVER, LARAVEL ECHO, PUSHER JS. </h5>
+<p class="card-text">
+В видео подробно рассказывается о работе Laravel 10 и сервиса сообщений в реальном времени Pusher, разберем работу двух пакетов которые предлагает документация. Разбирать будем пошагово сначала поработаем с одним пакетом PUSHER PHP SERVER и будем отправлять сообщения на Pusher где примем их в консоли. Далее второй шаг установим в новый проект LARAVEL ECHO совмещенный с PUSHER JS и будем принимать сообщения из консоли Pusher. И наконец третий шаг соединим оба пакета в одном проекте, поработаем с приватными и обычными каналами и пр. <br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\pusher2 //переходим в проект
+composer require pusher/pusher-php-server  // устанавливаем пакет пушер сервер
+php artisan make:event CommentEvent  // создаем событие для отправки сообщений
+php artisan make:controller PusherController // создаем контроллер
+php artisan migrate // накатываем миграции
+php artisan db:seed // накатываем сидеры
+npm install --save-dev laravel-echo pusher-js // пакет ларавел эхо
+npm i @vitejs/plugin-vue  // пакет VUE
+npm run dev  // постоянная сборка
+npm run build  // проводим сборку однократно
+============================================================
+В роуте web
+------------------------------------------------------------
+use App\Http\Controllers\PusherController;  // подключаем контроллер
+------------------------------------------------------------
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/mes', [PusherController::class, 'message']);
+Route::post('/mes', [PusherController::class, 'message']);
+
+Route::get('/bob', function () {  // мини регистрация
+    auth()->loginUsingId(1);
+    return view('welcome');
+});
+
+Route::get('/ted', function () {
+    auth()->loginUsingId(2);
+    return view('welcome');
+});
+============================================================
+Во вьюхе welcome.blade получаем сообщения через JS файл
+------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon"href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocketPusher</title>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+</head>
+<body>
+
+<script>
+var pusher = new Pusher("{{env('PUSHER_APP_KEY')}}", {
+  cluster: "{{env('PUSHER_APP_CLUSTER')}}",
+});
+var channel = pusher.subscribe("message");
+channel.bind("text", (data) => {
+  console.log(data)
+});
+</script>
+
+</body>
+</html>
+============================================================
+В контроллере PusherController
+------------------------------------------------------------
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Events\CommentEvent; // подключаем событие
+
+class PusherController extends Controller
+{
+    public function message(Request $request)
+    {
+        $data = $request->book;
+        event(new CommentEvent($data));  // создаем событие
+    }
+}
+============================================================
+В событии CommentEvent
+------------------------------------------------------------
+<?php
+
+namespace App\Events;
+
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class CommentEvent implements ShouldBroadcast  // подключаем интерфейс
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
+    public function broadcastWhen()  // проверяем условие
+    {
+        return 1 === 1;
+    }
+
+    public function broadcastOn(): array // создаем канал
+    {
+        return [
+            new PrivateChannel('message'.auth()->id()),
+            // new Channel('message')
+        ];
+    }
+    public function broadcastAs(): string  // создаем событие
+    {
+        return 'text';
+    }
+    public function broadcastWith(): array  // сообщение
+    {
+        return ['data' => $this->data ];
+    }
+}
+============================================================
+В vite.config.js делаем настройку для VUE
+------------------------------------------------------------
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue'
+export default defineConfig({
+    plugins: [
+        vue(),
+        laravel({
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+            ],
+            refresh: true,
+        }),
+    ],
+});
+============================================================
+В welcome.blade после установки laravel-echo
+------------------------------------------------------------
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+
+<script>
+    window.userID = {{ auth()->id() }};
+  </script>
+
+@auth
+<p>Привествуем! {{ Auth::user()->name }}</p>
+@else
+Приветствуем гость
+@endauth
+
+<div id="app"></div>
+============================================================
+В test.vue
+------------------------------------------------------------
+<template>
+    <h1>Hello Vue!</h1>
+    <input type="text" v-model="input" name="name">
+    <button type="button" @click="buttonClick()">Отправить</button>
+
+    <div v-for="(el) in list">
+        <p>{{ el }}</p>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            list: [],
+            input: "Hello User",
+        }
+    },
+    methods:{
+        buttonClick(){
+                axios.post('/mes', { book: this.input});
+                }
+            },
+    created: function () {
+        window.Echo.private('message'+window.userID)
+            .listen('.text', res => {
+                this.list.push(res.data);
+                console.log(res);
+            });
+            window.Pusher.logToConsole = true;  // получаем техсообщения
+    }
+}
+</script>
+<style scoped>
+</style>
+============================================================
+В app.js
+------------------------------------------------------------
+import './bootstrap';
+import { createApp } from 'vue/dist/vue.esm-bundler';
+import test from './test.vue';
+createApp(test).mount('#app');
+============================================================
+В роуте channel
+------------------------------------------------------------
+Broadcast::channel('message{id}', function ($id) {
+    return $id->id === auth()->id();
+});
+============================================================
+В config\app.php раскомментируем строку (внизу файла)
+------------------------------------------------------------
+App\Providers\BroadcastServiceProvider::class,
+============================================================
+Разное
+------------------------------------------------------------
+https://pusher.com/  Сайт Pusher
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 1 сентября 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/QSMG8zVKqJ8">https://youtu.be/QSMG8zVKqJ8</a>
+</p>
+</div>
+</div>
+</section>
 
 <!-- ================================================================================================== -->
 <section class="p-3  ">
