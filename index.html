@@ -17,6 +17,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#valid">№20 Ларавел 10 валидация  </option>
     <option VALUE="index.html#pusher3">№19 Pusher + Ларавел 10 пакеты </option>
     <option VALUE="index.html#lapusher">№18 Ларавел 10 + Pusher </option>
     <option VALUE="index.html#pusher">№17 WebSocket Pusher говнокод</option>
@@ -41,6 +42,216 @@
 </div>
 </div>
 </header>
+
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="valid"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 20
+</div>
+<div class="card-body">
+<h5 class="card-title">Laravel 10 Validation & FormRequest валидация данных в Ларавел 10. </h5>
+<p class="card-text">
+В видео рассказывается о валидации входящих данных, работаем с данными из формы ввода, работаем с асинхронным запросом, а так же запросом из Постмана. Пошагово рассмотрим валидацию сначала просто в контроллере, а потом с помощью класса FormRequest. Будем выводить ошибки валидации, русифицируем их и изменим под себя. Так же поговорим о различных методах класса FormRequest. <br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\request //переходим в проект
+php artisan make:controller ValidationController // создаем контроллер
+php artisan lang:publish  // выводим директорию под тексты ошибок
+php artisan make:request ValidationRequest  // создаем FormRequest
+============================================================
+В роуте web
+------------------------------------------------------------
+use App\Http\Controllers\ValidationController;  // подключаем контроллер
+------------------------------------------------------------
+Route::post('/', [ValidationController::class, 'valid'])->name('valid');
+------------------------------------------------------------
+Route::post('/query', [ValidationController::class, 'query'])->name('query');
+============================================================
+Во вьюхе welcome.blade
+------------------------------------------------------------
+@if ($errors->any())
+    <div>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<form method="POST" action="{{ route('valid') }}">
+
+    @csrf
+
+    @error('text')
+        <div>ошибка {{ $message }}</div>
+    @enderror
+
+    <input type="text" name="text" placeholder="Введите текст" value="{{ old('text') }}"><br><br>
+
+    @error('int')
+        <div>ошибка {{ $message }}</div>
+    @enderror
+
+    <input type="text" name="int" placeholder="Введите число" value="{{ old('int') }}"><br><br>
+
+    <input type="submit">
+</form>
+
+@if (isset($validated))
+    @json($validated)
+@endif
+
+<script>
+    fetch('http://request/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{csrf_token()}}'
+            },
+            body: JSON.stringify({
+                text: 'Lorem Ipsum',
+                int: '88888',
+            })
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Fetch error:', error));
+</script>
+============================================================
+В контроллере ValidationController без FormRequest
+------------------------------------------------------------
+    public function valid(Request $request)
+    {
+        $validated = $request->validate([
+            'text' => ['required', 'string', 'min:5'],
+            'int' => ['nullable', 'integer', 'min:500'],
+        ]);
+        return view('welcome', compact('validated'));
+    }
+
+    public function query(Request $request)
+    {
+        $validated = $request->validate([
+            'text' => ['required', 'string', 'min:5'],
+            'int' => ['nullable', 'integer', 'min:500'],
+        ]);
+    return $validated;
+    }
+============================================================
+В контроллере ValidationController с FormRequest
+------------------------------------------------------------
+use App\Http\Requests\ValidationRequest;
+
+    public function valid(ValidationRequest $request)
+    {
+        $validated = $request->all();
+        return view('welcome', compact('validated'));
+    }
+
+    public function query(ValidationRequest $request)
+    {
+        $validated = $request->validated();
+        return $validated;
+    }
+============================================================
+В ValidationRequest
+------------------------------------------------------------
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ValidationRequest extends FormRequest
+{
+    // protected $redirect = 'https://indeedphp.github.io/toSenior_PHP/';
+    // protected $redirectRoute = 'welcome';
+    // protected $stopOnFirstFailure = true;
+
+    public function authorize(): bool
+    {
+        return 1 == 1;
+    }
+
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'text' => 'hello user',
+    //     ]);
+    // }
+
+    public function rules(): array
+    {
+        return [
+            'text' => ['required', 'string', 'min:5'],
+            'int' => ['nullable', 'integer', 'min:500'],
+        ];
+    }
+
+    // public function passedValidation()
+    // {
+    //     $this->merge([
+    //         'text' => 'Goodbye user',
+    //     ]);
+    // }
+
+    public function attributes(): array
+    {
+        return [
+            'text' => 'для ввода текста',
+            'int' => 'для ввода чисел',
+        ];
+    }
+
+    // public function messages(): array
+    // {
+    //     return [
+    //         'text.required' => 'Обязательно!!!',
+    //         'int.min' => 'Минимум 500!!!',
+    //     ];
+    // }
+}
+============================================================
+Разное
+------------------------------------------------------------
+ 'locale' => 'ru',  // в config\app.php меняем на ru для русификации
+ -----------------------------------------------------------
+ protected $except = ['/query']; // в Http\Middleware\VerifyCsrfToken разрешаем маршрут без Csrf
+ -----------------------------------------------------------
+ https://github.com/Laravel-Lang/lang/tree/main // для русиикации перевод
+ -----------------------------------------------------------
+ https://www.coderstool.com/convert-json-to-php-array // онлайн конвертор
+ -----------------------------------------------------------
+ https://laravel.su/docs/10.x/validation  // документация ларавел на русском
+ -----------------------------------------------------------
+ https://laravel.com/docs/10.x/validation  // документация ларавел на английском
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 8 сентября 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/KJf5ykK-q2I">https://youtu.be/KJf5ykK-q2I</a>
+</p>
+</div>
+</div>
+</section>
+
+
+
+
+
+
 
 <!-- ================================================================================================== -->
 <section class="p-3  ">
