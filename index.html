@@ -17,6 +17,7 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#rabbit">№21 Ларавел 10 & Rabbit MQ  </option>
     <option VALUE="index.html#valid">№20 Ларавел 10 валидация  </option>
     <option VALUE="index.html#pusher3">№19 Pusher + Ларавел 10 пакеты </option>
     <option VALUE="index.html#lapusher">№18 Ларавел 10 + Pusher </option>
@@ -42,6 +43,159 @@
 </div>
 </div>
 </header>
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="rabbit"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 21
+</div>
+<div class="card-body">
+<h5 class="card-title">Laravel 10 & Rabbit MQ брокер сообщений и два микросервиса. установка. биндинг. обменник. очередь </h5>
+<p class="card-text">
+В видео подробно описывается работа брокера сообщений Rabbit MQ, Сначала мы установим Rabbit MQ в Windows затем создадим с помощью графического интерфейса обменник и очередь и свяжем их с помощью связей, далее создадим два микросервиса на Laravel 10 и будем на одном создавать юзера, а на втором входить в приложение.<br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+rabbitmq-plugins.bat enable rabbitmq_management  // графический интерфейс
+------------------------------------------------------------
+cd domains\publisher //переходим в проект
+cd domains\consumer //переходим в проект
+composer require php-amqplib/php-amqplib // устанавливаем библиотеку для раббит
+php artisan make:command ConsumerRabbitCommand  // создаем команду для консоли
+php artisan make:controller LoginController // создаем контроллер
+php artisan make:controller RabbitController // создаем контроллер
+php artisan migrate // накатываем миграции
+php artisan app:consumer-rabbit-command // открываем канал приема сообщений
+============================================================
+В роуте web \\ publisher
+------------------------------------------------------------
+use App\Http\Controllers\RabbitController;
+------------------------------------------------------------
+Route::post('/', [RabbitController::class, 'rabbit'])->name('rabbit');
+============================================================
+Во вьюхе welcome.blade \\ publisher
+------------------------------------------------------------
+<form method="POST"  action="{{ route('rabbit') }}">
+    @csrf
+    <input type="text" name="name" placeholder="name" >
+    <input type="text" name="email" placeholder="email">
+    <input type="text" name="password" placeholder="password">
+    <input type="submit">
+</form>
+============================================================
+В контроллере RabbitController \\ publisher
+------------------------------------------------------------
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+
+class RabbitController extends Controller
+{
+    public function rabbit(Request $request)
+    {
+        $array = $request->only(['email','password','name']);
+        $json_array = json_encode ($array );
+
+        $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+        $channel = $connection->channel();
+
+        $msg = new AMQPMessage($json_array);
+        $channel->basic_publish($msg,'rabbit');
+
+        $channel->close();
+        $connection->close();
+        return view('welcome');
+    }
+}
+============================================================
+============================================================
+Во вьюхе welcome.blade \\ consumer
+------------------------------------------------------------
+@auth
+<p>Привествуем! {{ Auth::user()->name }}
+@else
+<p>Приветствуем гость!</p>
+@endauth
+
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+    <input type="email" name="email" placeholder="email">
+    <input type="password" name="password" placeholder="password">
+    <button type="submit">отправить</button>
+    </form>
+============================================================
+В app\Console\Commands\ConsumerRabbitCommand \\ consumer
+------------------------------------------------------------
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Models\User;
+class ConsumerRabbitCommand extends Command
+{
+    protected $signature = 'app:consumer-rabbit-command';
+    protected $description = 'Command description';
+    public function handle()
+    {
+        $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+        $channel = $connection->channel();
+        echo " [*] Waiting for messages. To exit press CTRL+C\n";
+        $callback = function ($msg) {
+            echo ' [x] Received ', $msg->body, "\n";
+            $body = json_decode($msg->body, true);
+            User::create(['email'=>$body['email'],'password'=>$body['password'],'name'=>$body['name']]);
+          };
+          // (Queue, consume_tag, no_local, no_ask, exclusive, nowait, callback)
+          $channel->basic_consume('office', '', false, true, false, false, $callback);
+          try {
+              $channel->consume();
+          } catch (\Throwable $exception) {
+              echo $exception->getMessage();
+          }
+    }
+}
+============================================================
+В роуте web \\ consumer
+------------------------------------------------------------
+use App\Http\Controllers\LoginController;
+------------------------------------------------------------
+Route::post('/', [LoginController::class, 'login'])->name('login');
+============================================================
+В контроллере RabbitController \\ consumer
+------------------------------------------------------------
+use Illuminate\Support\Facades\Auth;
+class LoginController extends Controller
+{
+    public function login(Request $request)
+    {
+    $arr = $request->only(['email','password']);
+    Auth::attempt($arr);
+    return view('welcome');
+    }
+}
+============================================================
+Разное
+------------------------------------------------------------
+https://www.rabbitmq.com/  // официальный сайт брокера
+http://localhost:15672  // адрес сервера раббит
+guest  guest  // юзернейм и пароль раббита по умолчанию
+https://www.rabbitmq.com/docs/install-windows // установочный файл раббита
+https://www.erlang.org/ // язык для раббит
+https://www.rabbitmq.com/docs/plugins  // плагины раббит
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 15 сентября 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/D6-M0NL1qJc">https://youtu.be/D6-M0NL1qJc</a>
+</p>
+</div>
+</div>
+</section>
+
 
 
 
