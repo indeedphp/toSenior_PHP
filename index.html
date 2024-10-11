@@ -17,6 +17,8 @@
 <div class="container rounded p-2 bg-light ">
 <select class="float-end px-4" onchange="window.location.href=this.options[this.selectedIndex].value">
     <option VALUE="index.html">Оглавление</option>
+    <option VALUE="index.html#wsl">№23 Линукс на Виндовс 10 WSL  </option>
+    <option VALUE="index.html#exception">№22 Исключения PHP & Ларавел 10  </option>
     <option VALUE="index.html#rabbit">№21 Ларавел 10 & Rabbit MQ  </option>
     <option VALUE="index.html#valid">№20 Ларавел 10 валидация  </option>
     <option VALUE="index.html#pusher3">№19 Pusher + Ларавел 10 пакеты </option>
@@ -43,6 +45,114 @@
 </div>
 </div>
 </header>
+
+
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="exception"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 22
+</div>
+<div class="card-body">
+<h5 class="card-title">Exception PHP & Laravel 10 Try Catch Исключения  в PHP коде и фреймворке Ларавел 10 </h5>
+<p class="card-text">
+В видео подробно рассказано об исключениях (ошибках) которые появляются при различных проблемах в коде и отображаются с помощью PHP . С помощью многочисленных примеров из жизни посмотрим для чего нужны ошибки и как они способны уберечь нас от различных проблем. Рассмотрим такую модель PHP как Try Catch которая способна отлавливать ошибки и исключения и выполнять различные действия, например менять текст ошибки, записывать в лог и так далее. Поработаем с фреймворком Ларавел 10 и создадим свой класс ошибок, а так же разберем некоторые проблемы.<br>
+<hr/></p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+В консоли
+------------------------------------------------------------
+cd domains\exception
+php artisan make:exception EndPipeException
+php artisan make:controller ViewsController
+============================================================
+В роуте web
+------------------------------------------------------------
+use App\Http\Controllers\ViewsController;;
+------------------------------------------------------------
+Route::get('/', [ViewsController::class, 'view']);
+============================================================
+В контроллере ViewsController
+------------------------------------------------------------
+use App\Exceptions\EndPipeException;
+
+class ViewsController extends Controller
+{
+    public function view()
+    {
+        try {
+            $int = 1 / 0;
+        } catch (\Throwable $e) {
+            throw new endPipeException('Труба все');
+        }
+        return view('welcome');
+    }
+}
+============================================================
+В app\Exceptions\EndPipeException
+------------------------------------------------------------
+use App\Models\User;
+class EndPipeException extends Exception
+{
+    public function context()
+    {
+        return ['лог' => 'Закончилась шланга3'];
+    }
+    public function render()
+    {
+        return 'Внимание: Закончилась шланга3';
+    }
+    // public function report() : void
+    // {
+    //     User::create(['email'=>'email','password'=>'password','name'=>'name']);
+    // }
+}
+============================================================
+Разное
+------------------------------------------------------------
+https://www.php.net/manual/ru/reserved.exceptions.php  // классы ошибок
+https://www.php.net/manual/ru/errorfunc.constants.php#constant.e-error // ошибки уровня
+error_reporting(E_ERROR);  // отключение уровня ошибок
+file_get_contents('https://catfact.ninja/fact');
+------------------------------------------------------------
+  try {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://catfact.ninja/fact'); // адрес api телеграмм
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($curl);
+        curl_close($curl);
+        print_r($result);
+            if($result == false )throw new Throwable();
+        } catch (\Throwable $e){
+            echo 'нет интернета';
+        }
+try {
+    } catch (\Exception $e){
+    }
+ -----------------------------------------------------------
+abort(404);  // вызываем ошибку из файла блейд и файл можно изменить
+------------------------------------------------------------
+php artisan vendor:publish --tag=laravel-errors  // вытаскиваем в шаблоны свои страницы с ошибками
+------------------------------------------------------------
+report($e);  // если нужно писать в лог то ставим хелпера
+============================================================
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 22 сентября 2024г &nbsp &nbsp  ссылка на видео
+<a href="https://youtu.be/iV7DWO9i2-U">https://youtu.be/iV7DWO9i2-U</a>
+</p>
+</div>
+</div>
+</section>
+
+
+
 
 
 <!-- ================================================================================================== -->
