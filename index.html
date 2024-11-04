@@ -52,109 +52,109 @@ onchange="window.location.href=this.options[this.selectedIndex].value">
 
 <!-- ================================================================================================== -->
 <section class="p-3  ">
-    <a name="docker"></a>
-    <div class="card ">
-    <div class="card-header">
-    Видео номер 24
-    </div>
-    <div class="card-body">
-    <h5 class="card-title">Докер & Ларавел 10 WSL Windows & Docker Desktop пошагово создадим image, контейнер и dockerfile </h5>
-    <p class="card-text">
-        В видео подробно показана установка Докера в систему виндовс на WSL , так же пошагово через dockerfile создадим image а затем запустим контейнер. Сделаем постепенно сначала просто html страничку, потом подключим php, затем поработаем с базой данных и фреймворком ларавел.
-    <br>
-    <hr />
-    </p>
-    <pre><xmp>
-    Использовано в видео:
-    ============================================================
-    https://docs.docker.com/desktop/install/windows-install/  // Ссылка на докер
-    docker -v  // версия докера
-    docker-compose -v  // версия докер компосе
-    docker run -d -p 8888:80 docker/welcome-to-docker  // Запускаем контейнер (сайт с анимацией открывается по адресу http://localhost:8888/
-    ===========================================================
-    Dockerfile // создаем файл с названием и без расширения
-    -----------------------------------------------------------
-    FROM ubuntu:24.04
-    RUN apt-get update
-    RUN apt-get install apache2 -y
-    RUN apt-get install php8.1 -y
-    RUN apt-get install libapache2-mod-php -y
-    RUN apt-get install php-mysqli -y
-    RUN apt-get install mysql-server-8.0 -y
-    RUN apt-get install php-cli -y
-    RUN apt-get install php-common -y
-    RUN apt-get install php-zip -y
-    RUN apt-get install php-gd -y
-    RUN apt-get install php-mbstring -y
-    RUN apt-get install php-curl -y
-    RUN apt-get install php-xml -y
-    RUN apt-get install php-bcmath -y
-    RUN apt-get install php-dom -y
-    WORKDIR /etc/apache2/sites-available
-    COPY 000-default.conf .
-    WORKDIR /var/www
-    COPY example ./example 
-    CMD service mysql start && apachectl -D FOREGROUND
-    =================================================
-    docker build . -t // Строим имадж
-    docker run -d -it -p 80:80 start1 // Сщздаем контейнер из имаджа
-    /bin/bash // в консоли контейнера переходим к root
-    apachectl -D FOREGROUND  // запускаем апач в консоли контейнера
-    pwd // узнаем где находимся
-    cd var/www //рабочая папка апач
-    mkdir test  //создает папку с названием «test» там, где вы находитесь
-    touch index.php  //команда создаст пустой файл с названием index.php
-    phpinfo(); // функция для вывода данных по php
-    =================================================
-    Работаем с базой в консоли контейнера
-    -------------------------------------------------
-    service mysql status  // проверяем статус
-    service mysql start  // запускаем базу
-    mysql  // входим в настройки базы
-    ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '12345678';  // настраиваем пароль 12345678 для юзера root для phpmyadmin
-    mysql -u root -p  // вход в базу с вводом пароля, пароль предлагают ввести ниже
-    exit  // выход из настроек базы
-    SHOW DATABASES;  // показать все базы
-    CREATE DATABASE test;  // создаем базу тест
-    USE test;  // выбрать базу данных для последующей работы с ней
-    SHOW TABLES;  // показать таблицы
-    CREATE TABLE `users` ( `id` INT UNSIGNED NOT NULL AUTO_INCREMENT , `name` VARCHAR(64) NOT NULL , PRIMARY KEY (`id`));  // создаем таблицу юзерс и две колонки ид и наме
-    INSERT `users` SET `name` = 'Elena Ivanova';  // вставляем данные в таблицу
-    SELECT * FROM `users`; // получаем данные из таблицы
-    UPDATE `users` SET `name` = 'Elena Popova' WHERE `id` = 1; // меняем данные
-    DELETE FROM `users` WHERE `id` = 1;  // удаляем данные 
-    DROP TABLE `users`; // удаляем таблицу
-    DROP DATABASE `test`;  // удаляем базу
-    ============================================================
-    Подключаемся к базе и читаем все
-    ------------------------------------------------------------
-    <?php
-    $server = "127.0.0.1";
-     $login = "root";
-     $pass = "12345678";
-     $name_bd = "test";
-     $link = mysqli_connect($server, $login, $pass, $name_bd);
-     if ($link == false){
-        echo "disconect bd";
-    }
-    
-    $q = mysqli_query($link, "SELECT * FROM `users`");
-    for ($data = []; $row = mysqli_fetch_assoc($q ); $data[] = $row);
-    var_dump($data); 
-    mysqli_close($link);
-    ?>
-    ==================================================================
-    C:\Windows\System32\drivers\etc  // папка где лежит хост файл для локального домена
-    </xmp></pre>
-    
-    </div>
-    <div class="card-footer text-muted">
-    <p class="card-text"> загружен 10 октября 2024г &nbsp &nbsp ссылка на видео
-    <a href="https://youtu.be/5eDACUOUN_U">https://youtu.be/5eDACUOUN_U</a>
-    </p>
-    </div>
-    </div>
-    </section>
+<a name="docker"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 24
+</div>
+<div class="card-body">
+<h5 class="card-title">Докер & Ларавел 10 WSL Windows & Docker Desktop пошагово создадим image, контейнер и dockerfile </h5>
+<p class="card-text">
+В видео подробно показана установка Докера в систему виндовс на WSL , так же пошагово через dockerfile создадим image а затем запустим контейнер. Сделаем постепенно сначала просто html страничку, потом подключим php, затем поработаем с базой данных и фреймворком ларавел.
+<br>
+<hr />
+</p>
+<pre><xmp>
+Использовано в видео:
+============================================================
+https://docs.docker.com/desktop/install/windows-install/  // Ссылка на докер
+docker -v  // версия докера
+docker-compose -v  // версия докер компосе
+docker run -d -p 8888:80 docker/welcome-to-docker  // Запускаем контейнер (сайт с анимацией открывается по адресу http://localhost:8888/
+===========================================================
+Dockerfile // создаем файл с названием и без расширения
+-----------------------------------------------------------
+FROM ubuntu:24.04
+RUN apt-get update
+RUN apt-get install apache2 -y
+RUN apt-get install php8.1 -y
+RUN apt-get install libapache2-mod-php -y
+RUN apt-get install php-mysqli -y
+RUN apt-get install mysql-server-8.0 -y
+RUN apt-get install php-cli -y
+RUN apt-get install php-common -y
+RUN apt-get install php-zip -y
+RUN apt-get install php-gd -y
+RUN apt-get install php-mbstring -y
+RUN apt-get install php-curl -y
+RUN apt-get install php-xml -y
+RUN apt-get install php-bcmath -y
+RUN apt-get install php-dom -y
+WORKDIR /etc/apache2/sites-available
+COPY 000-default.conf .
+WORKDIR /var/www
+COPY example ./example 
+CMD service mysql start && apachectl -D FOREGROUND
+=================================================
+docker build . -t // Строим имадж
+docker run -d -it -p 80:80 start1 // Сщздаем контейнер из имаджа
+/bin/bash // в консоли контейнера переходим к root
+apachectl -D FOREGROUND  // запускаем апач в консоли контейнера
+pwd // узнаем где находимся
+cd var/www //рабочая папка апач
+mkdir test  //создает папку с названием «test» там, где вы находитесь
+touch index.php  //команда создаст пустой файл с названием index.php
+phpinfo(); // функция для вывода данных по php
+=================================================
+Работаем с базой в консоли контейнера
+-------------------------------------------------
+service mysql status  // проверяем статус
+service mysql start  // запускаем базу
+mysql  // входим в настройки базы
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '12345678';  // настраиваем пароль 12345678 для юзера root для phpmyadmin
+mysql -u root -p  // вход в базу с вводом пароля, пароль предлагают ввести ниже
+exit  // выход из настроек базы
+SHOW DATABASES;  // показать все базы
+CREATE DATABASE test;  // создаем базу тест
+USE test;  // выбрать базу данных для последующей работы с ней
+SHOW TABLES;  // показать таблицы
+CREATE TABLE `users` ( `id` INT UNSIGNED NOT NULL AUTO_INCREMENT , `name` VARCHAR(64) NOT NULL , PRIMARY KEY (`id`)); //создаем таблицу и две колонки
+INSERT `users` SET `name` = 'Elena Ivanova';  // вставляем данные в таблицу
+SELECT * FROM `users`; // получаем данные из таблицы
+UPDATE `users` SET `name` = 'Elena Popova' WHERE `id` = 1; // меняем данные
+DELETE FROM `users` WHERE `id` = 1;  // удаляем данные 
+DROP TABLE `users`; // удаляем таблицу
+DROP DATABASE `test`;  // удаляем базу
+============================================================
+Подключаемся к базе и читаем все
+------------------------------------------------------------
+<?php
+$server = "127.0.0.1";
+$login = "root";
+$pass = "12345678";
+$name_bd = "test";
+$link = mysqli_connect($server, $login, $pass, $name_bd);
+if ($link == false){
+echo "disconect bd";
+}
+
+$q = mysqli_query($link, "SELECT * FROM `users`");
+for ($data = []; $row = mysqli_fetch_assoc($q ); $data[] = $row);
+var_dump($data); 
+mysqli_close($link);
+?>
+==================================================================
+C:\Windows\System32\drivers\etc  // папка где лежит хост файл для локального домена
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 3 ноября 2024г &nbsp &nbsp ссылка на видео
+<a href="https://youtu.be/5eDACUOUN_U">https://youtu.be/W99Dc3TpVLk</a>
+</p>
+</div>
+</div>
+</section>
 
 
 
