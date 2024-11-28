@@ -19,6 +19,7 @@
 <select class="float-end px-4"
 onchange="window.location.href=this.options[this.selectedIndex].value">
 <option VALUE="index.html">Оглавление</option>
+<option VALUE="index.html#bot">№25 Телеграмм бот примеры  </option>
 <option VALUE="index.html#docker">№24 Докер на Виндовс 10 WSL </option>
 <option VALUE="index.html#wsl">№23 Линукс на Виндовс 10 WSL </option>
 <option VALUE="index.html#exception">№22 Исключения PHP & Ларавел 10 </option>
@@ -48,6 +49,568 @@ onchange="window.location.href=this.options[this.selectedIndex].value">
 </div>
 </div>
 </header>
+
+
+
+<!-- ================================================================================================== -->
+<section class="p-3  ">
+<a name="bot"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 25
+</div>
+<div class="card-body">
+<h5 class="card-title">Телеграм бот PHP + JS простые примеры, отправка и прием текста, фото, файлов, кнопок, клавиатуры.</h5>
+<p class="card-text">
+В видео собрана коллекция простых примеров работы с телеграм ботом, сначала примеры выполненны в адресной строке браузера, то есть просто ссылкой будем получать и отправлять текст, файлы, фото и видео. Примеры даются на двух языках PHP и JS, сначала будем отправлять текст, кнопки, клавиатуру, фото, видео и файлы. Затем будем получать из бота текст, фото, видео, файлы. ВНИМАНИЕ, ПРИ РАБОТЕ В JS ВЫ ДЕЛАЕТЕ ДОСТУПНЫМ ТОКЕН БОТА И ПР., ПРИМЕРЫ ДАНЫ ДЛЯ ОБЩЕГО ПОНИМАНИЯ ПРИНЦИПОВ РАБОТЫ.
+<br>
+<hr />
+</p>
+
+<pre><xmp>
+Использовано в видео:
+===========================================================
+Получаем и отправляем GET запросами
+===========================================================
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getUpdates  // GET получение сообщений
+-----------------------------------------------------------
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage?chat_id=7124124425&text=Hello, bot! // GET отправка текста боту
+-----------------------------------------------------------
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendPhoto?chat_id=7124124425&photo=https://proza.ru/pics/2021/09/03/24.jpg // GET отправка фото боту
+-----------------------------------------------------------
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendVideo?chat_id=7124124425&video=https://indeedphp.github.io/arduino/video/can_lin_test_9.mp4 // GET отправка видео боту
+-----------------------------------------------------------
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendDocument?chat_id=7124124425&document=https://indeedphp.github.io/arduino/files/kontrolka9_9.zip // GET отправка файла боту
+-----------------------------------------------------------
+https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendMessage?chat_id=-4512927034&text=Hello, clear_cod_php!  // Отправляем сообщение в группу (id с минусом)
+-----------------------------------------------------------
+========================================================================================================
+ОТПРАВКА ТЕКСТОВОГО СООБЩЕНИЯ В КОДЕ
+========================================================================================================
+ПХП отправка сообщения гет запросом
+--------------------------------------------------------------------------------------------------------
+<?php
+ file_get_contents("https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage?chat_id=7124124425&text=Hello, php");
+?>
+--------------------------------------------------------------------------------------------------------
+ЖС отправка сообщения гет запросом
+--------------------------------------------------------------------------------------------------------
+<script>
+ fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage?chat_id=7124124425&text=123'); 
+</script>
+--------------------------------------------------------------------------------------------------------
+ПХП отправка пост запросом сообщения в бота
+--------------------------------------------------------------------------------------------------------
+<?php
+    $tg_user = '7124124425';
+    $bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; 
+    
+    $text = "Пост сообщение PHP";
+    
+    $params = array( 
+        'chat_id' => $tg_user, 
+        'text' => $text, 
+        'parse_mode' => 'html', 
+    );
+    
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage');
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); 
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10); 
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+    $result = curl_exec($curl); // запрос к api
+    curl_close($curl);
+ ?>
+ -------------------------------------------------------------------------------------------------------
+ ЖС отправка пост текста в бота
+ -------------------------------------------------------------------------------------------------------
+ <script>
+fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({chat_id: 7124124425, text: 'Пост сообщение JS'})
+  });
+</script>
+--------------------------------------------------------------------------------------------------------
+ПХП отправка пост запросом сообщения в бота из инпута
+--------------------------------------------------------------------------------------------------------
+<form action="" method="POST">
+<p> 
+<input type="text" name="text" >
+</p>
+<input type="submit" name="formS" value="Отправить">
+</form>
+
+<?php
+if(!empty($_POST ["text"])) { $text = $_POST ["text"];
+
+    $tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+    $bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+    
+    $params = array(  // параметры, которые отправятся в api телеграмм
+        'chat_id' => $tg_user, // id получателя сообщения
+        'text' => $text, // текст сообщения
+        'parse_mode' => 'html', // режим отображения сообщения, не обязательный параметр
+    );
+    
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage'); // адрес api телеграмм
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // отправка данных  
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10); // максимальное время выполнения запроса
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $params); // параметр используемый для установки тела POST-запроса.
+    $result = curl_exec($curl); // запрос к api
+    curl_close($curl);
+  }
+ ?>
+ --------------------------------------------------------------------------------------------------------
+ ЖС отправляем методом пост из инпута текст в бота
+ --------------------------------------------------------------------------------------------------------
+ <input id="input-id"><br><br>
+<input type="submit" id="submit">
+
+<script>
+let input = document.getElementById('input-id'); // Извлекаем элемент input
+let submit = document.getElementById('submit');  // Извлекаем элемент submit
+submit.addEventListener('click', function () {  // ждем клика по кнопке отправить
+    let value = input.value; // заберем значение из инпута
+    fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({chat_id: 7124124425, text: value})
+  })});
+</script>
+ ===============================================================================================================
+ ОТПРАВКА КНОПОК В ТЕКСТОВОЕ ПОЛЕ БОТА
+ ===============================================================================================================
+ ПХП отправляем кнопки на бота 
+ ---------------------------------------------------------------------------------------------------------------
+ <?php
+    $tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+    $bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+    
+    $text = "Отправляем кнопки PHP";
+    
+    $params = array(  // параметры, которые отправятся в api телеграмм
+        'chat_id' => $tg_user, // id получателя сообщения
+        'text' => $text, // текст сообщения
+        
+        'reply_markup' => json_encode(array(
+    'inline_keyboard' => array(
+	    array(
+	        array(
+		        'text' => 'Кнопка 1',  // название кнопки отобразится в телеграмм
+		        'callback_data' => '123',  // значение кнопки вернется по апи на сервер
+	        ),
+            array(
+		        'text' => 'Button 2',
+		        'callback_data' => '456',  
+	        ),
+	    )),
+    )),
+    );
+    
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage'); // адрес api телеграмм
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // отправка данных 
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10); // максимальное время выполнения запроса
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $params); // параметры запроса
+    $result = curl_exec($curl); // запрос к api
+    curl_close($curl);
+ ?>
+ -----------------------------------------------------------------------------------------------------------------
+ ЖС отправка кнопок в текстовое поле бота
+ -----------------------------------------------------------------------------------------------------------------
+ <script>
+  var post = {
+    chat_id: '7124124425',
+    text: 'Отправляем кнопки JS',
+    reply_markup: {
+      inline_keyboard: [
+        [{
+          text: 'Кнопка номер один',
+          callback_data: '1'
+        }],
+        [{
+          text: 'Some button text 2',
+          callback_data: '2'
+        }],
+        [{
+          text: 'Some button text 3',
+          callback_data: '3'
+        }]
+      ]
+    }
+  };
+
+  fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(post)
+  });
+</script>
+ ================================================================================================================
+ ОТПРАВКА КЛАВИАТУРЫ БОТУ, НИЖЕ ПОЛЯ ВВОДА
+ ================================================================================================================
+ ПХП выводим сообщение и клавиатуру с двумя кнопками
+ ----------------------------------------------------------------------------------------------------------------
+<?php
+$tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+$bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+
+$text = "Клавиатура для бота на PHP";
+
+// параметры, которые отправятся в api телеграмм
+$params = [
+  'chat_id' => $tg_user, // id получателя сообщения
+  'text' => $text, // текст сообщения
+
+  'reply_markup' => json_encode([
+    'keyboard' => [
+      [
+        [
+          'text' => 'кнопка 124',
+        ],
+        [
+          'text' => "кнопка 224",
+        ],
+      ]
+    ],
+    'one_time_keyboard' => TRUE,  // появление сокрытие клавиатуры
+    'resize_keyboard' => TRUE,  // растягивать клавиатуру
+  ]),
+];
+
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage'); // адрес api телеграмм
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // отправка данных методом POST
+curl_setopt($curl, CURLOPT_TIMEOUT, 10); // максимальное время выполнения запроса
+curl_setopt($curl, CURLOPT_POSTFIELDS, $params); // параметры запроса
+$result = curl_exec($curl); // запрос к api
+curl_close($curl);
+?>
+-------------------------------------------------------------------------------------------------------------------
+ПХП Удаление клавиатуры
+-------------------------------------------------------------------------------------------------------------------
+<?php
+$tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+$bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+
+$text = "бот убрал клавиатуру PHP";
+
+// параметры, которые отправятся в api телеграмм
+$params = [
+  'chat_id' => $tg_user, // id получателя сообщения
+  'text' => $text, // текст сообщения
+  'reply_markup' => json_encode([
+    'remove_keyboard' => true,
+  ]),
+];
+
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage'); // адрес api телеграмм
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // отправка данных методом POST
+curl_setopt($curl, CURLOPT_TIMEOUT, 10); // максимальное время выполнения запроса
+curl_setopt($curl, CURLOPT_POSTFIELDS, $params); // параметры запроса
+$result = curl_exec($curl); // запрос к api
+curl_close($curl);
+?>
+--------------------------------------------------------------------------------------------------------------------
+ЖС сообщение и 3 кнопки ниже поля ввода в ряд
+--------------------------------------------------------------------------------------------------------------------
+<script>
+  var post = {
+    chat_id: '7124124425',
+    text: 'Клавиатура для бота на JS',
+    reply_markup: {
+      keyboard: [
+        [{text: 'Кнопка номер один 1'}],
+        [{text: 'Some button text 2'}],
+        [{text: 'Some button text 3'}]
+      ],
+      one_time_keyboard: true,  
+      resize_keyboard: true, 
+    }
+  };
+
+  fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(post)
+  });
+</script>
+-----------------------------------------------------------------------------------------------------------------------
+ЖС бот убрал клавиатуру
+-----------------------------------------------------------------------------------------------------------------------
+<script>
+  var post = {
+    chat_id: '7124124425',
+    text: 'бот убрал клавиатуру JS',
+    reply_markup: {
+      remove_keyboard: true
+    }
+  };
+
+  fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(post)
+  });
+</script>
+========================================================================================================================
+ОТПРАВКА ФОТО В ТЕЛЕГРАММ БОТА
+========================================================================================================================
+ПХП отпавляем фото с текстом
+------------------------------------------------------------------------------------------------------------------------
+<?php
+$tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+$bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+
+$response = array(
+	'chat_id' => $tg_user,
+	'caption' => 'text',  // можно вставить капчу подпись под фото
+	'photo' => curl_file_create('1.jpg')  // берем фото из корневой директории 
+);	
+
+$ch = curl_init('https://api.telegram.org/bot' . $bot_token . '/sendPhoto');  
+curl_setopt($ch, CURLOPT_POST, 1);  
+curl_setopt($ch, CURLOPT_POSTFIELDS, $response);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, false);
+curl_exec($ch);
+curl_close($ch);
+ ?>
+ -----------------------------------------------------------------------------------------------------------------------
+ ЖС отправляем фото из инпута в бот
+ -----------------------------------------------------------------------------------------------------------------------
+<input type="file" id="input-id"><br><br>
+<input type="submit" id="submit">
+
+<script>
+let submit = document.getElementById('submit');  // Извлекаем элемент submit
+
+submit.addEventListener('click', function() { // ждем клика по кнопке отправить
+const fileInput = document.getElementById('input-id'); // получаем элемент input для загрузки файла
+const file2 = fileInput.files[0]; // получаем выбранный файл
+const formData = new FormData(); // создаем объект FormData для передачи файла
+formData.append('photo', file2); // добавляем файл в объект FormData
+
+var requestOptions = {
+ method: 'POST',
+ body: formData,
+};
+
+fetch("https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendPhoto?chat_id=7124124425", requestOptions)
+});
+ </script>
+========================================================================================================================
+ОТПРАВЛЯЕМ ВИДЕО В ТЕЛЕГРАММ БОТА
+========================================================================================================================
+ПХП отправляем видео с текстом
+------------------------------------------------------------------------------------------------------------------------
+ <?php
+$tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+$bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+
+$response = array(
+	'chat_id' => $tg_user,
+	'caption' => 'text',  // можно вставить капчу подпись под фото
+	'video' => curl_file_create('2.mp4')  // берем фото из корневой директории 
+);	
+
+$ch = curl_init('https://api.telegram.org/bot' . $bot_token . '/sendVideo');  
+curl_setopt($ch, CURLOPT_POST, 1);  
+curl_setopt($ch, CURLOPT_POSTFIELDS, $response);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, false);
+curl_exec($ch);
+curl_close($ch);
+ ?>
+ -----------------------------------------------------------------------------------------------------------------------
+ЖС отправляем видео из инпута без текста
+ -----------------------------------------------------------------------------------------------------------------------
+ <input type="file" id="input-id"><br><br>
+<input type="submit" id="submit">
+
+<script>
+let submit = document.getElementById('submit');  // Извлекаем элемент submit
+
+submit.addEventListener('click', function() { // ждем клика по кнопке отправить
+const fileInput = document.getElementById('input-id'); // получаем элемент input для загрузки файла
+const file2 = fileInput.files[0]; // получаем выбранный файл
+const formData = new FormData(); // создаем объект FormData для передачи файла
+formData.append('video', file2); // добавляем файл в объект FormData
+
+var requestOptions = {
+ method: 'POST',
+ body: formData,
+};
+
+fetch("https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendVideo?chat_id=7124124425", requestOptions)
+});
+</script>
+ =======================================================================================================================
+ ОТПРАВЛЯЕМ ФАЙЛ В БОТА
+ =======================================================================================================================
+ ПХП отправяляем файл в бота
+ -----------------------------------------------------------------------------------------------------------------------
+<?php
+$tg_user = '7124124425'; // id пользователя, которому отправиться сообщения
+$bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; // токен бота
+
+$response = array(
+	'chat_id' => $tg_user,
+	'caption' => 'text',  // можно вставить капчу подпись под фото
+	'document' => curl_file_create('index1.php')  // берем фото из корневой директории 
+);	
+
+$ch = curl_init('https://api.telegram.org/bot' . $bot_token . '/sendDocument');  
+curl_setopt($ch, CURLOPT_POST, 1);  
+curl_setopt($ch, CURLOPT_POSTFIELDS, $response);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, false);
+curl_exec($ch);
+curl_close($ch);
+ ?>
+ -----------------------------------------------------------------------------------------------------------------------
+ ЖС отправляем файл в телеграм бота
+ -----------------------------------------------------------------------------------------------------------------------
+ <input type="file" id="input-id"><br><br>
+<input type="submit" id="submit">
+
+<script>
+let submit = document.getElementById('submit');  // Извлекаем элемент submit
+
+submit.addEventListener('click', function() { // ждем клика по кнопке отправить
+const fileInput = document.getElementById('input-id'); // получаем элемент input для загрузки файла
+const file2 = fileInput.files[0]; // получаем выбранный файл
+const formData = new FormData(); // создаем объект FormData для передачи файла
+formData.append('document', file2); // добавляем файл в объект FormData
+
+var requestOptions = {
+ method: 'POST',
+ body: formData,
+};
+
+fetch("https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/sendDocument?chat_id=7124124425", requestOptions)
+});
+</script>
+=========================================================================================================================
+ПОЛУЧЕНИЕ ДАННЫХ
+=========================================================================================================================
+ПОЛУЧЕНИЕ СООБЩЕНИЙ В КОДЕ
+=========================================================================================================================
+пхп получаем все сообщения из бота и выводим на страницу
+-------------------------------------------------------------------------------------------------------------------------
+<?php
+$data = file_get_contents('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getUpdates');
+$data2 = json_decode($data, true);
+echo '<pre>';
+print_r($data2);
+echo '</pre>';
+?>
+-------------------------------------------------------------------------------------------------------------------------
+ЖС получаем все сообщения и выводим в консоль
+-------------------------------------------------------------------------------------------------------------------------
+<script>
+fetch("https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getUpdates")
+.then( (response) => response.json())
+.then((data) => console.log(data))
+</script>
+=========================================================================================================================
+ПОЛУЧАЕМ ФОТО ИЗ ТЕЛЕГРАММ БОТА
+=========================================================================================================================
+ Получаем фото из телеграмм бота, сначала запрос приходит ответ потом из ответа берем путь и еще запрос на файл который сразу закачивается
+ ------------------------------------------------------------------------------------------------------
+ https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getFile?file_id=AgACAgIAAxkBAAMhZ0dbPPzPuaVDPqbMfDrAbgw7MrYAAgHpMRs9XTlKuoZqmmCIAiIBAAMCAAN4AAM2BA
+-------------------
+{"ok":true,"result":{"file_id":"AgACAgIAAxkBAAIE3Wc8ryycickfqDb8kwPDigH04ymxAAI56jEbBW_oSR8IsoToQNJuAQADAgADeAADNgQ","file_unique_id":"AQADOeoxGwVv6El9","file_size":40816,"file_path":"photos/file_96.jpg"}}
+-------------------------------------
+ https://api.telegram.org/file/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/photos/file_0.jpg
+ ------------------------------------------------------------------------------------------------------------------------
+ ПХП получаем фото и сохраняем на сервер (файл и видео тоже так сохраняются)
+ ------------------------------------------------------------------------------------------------------------------------
+ <?php
+$file = 'AgACAgIAAxkBAAMhZ0dbPPzPuaVDPqbMfDrAbgw7MrYAAgHpMRs9XTlKuoZqmmCIAiIBAAMCAAN4AAM2BA';
+$data = file_get_contents('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getFile?file_id='. $file);
+$data2 = json_decode($data, true);
+$data3 = $data2['result']['file_path'];
+
+$papex_url = 'https://api.telegram.org/file/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/'.$data3;
+$lastPart = basename($papex_url);  // берем из ссылки имя файла с расширением
+
+$ch = curl_init();  // Инициализация сеанса cURL
+curl_setopt($ch, CURLOPT_URL, $papex_url); // URL файла для загрузки
+$fp = fopen($lastPart, 'w');   // создаем файл (имя, код параметра файла)
+curl_setopt($ch, CURLOPT_FILE, $fp); // Запрос cURL на запись содержимого в файл
+curl_exec ($ch);  // Выполнение сеанса cURL
+curl_close ($ch); // Закрытие сеанса cURL 
+fclose($fp); // закрытие файла
+?>
+------------------------------------------------------------------------------------------------------------------------
+ЖС получаем фото и выводим на страницу
+------------------------------------------------------------------------------------------------------------------------
+<div id="image-container"></div>
+<script>
+let file = 'AgACAgIAAxkBAAMhZ0dbPPzPuaVDPqbMfDrAbgw7MrYAAgHpMRs9XTlKuoZqmmCIAiIBAAMCAAN4AAM2BA';
+  fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getFile?file_id='+ file)
+    .then((response) => response.json())
+    .then((data) => {
+      let tenp = data.result.file_path;
+      console.log(tenp);
+      let image = document.createElement('img');
+      image.src = 'https://api.telegram.org/file/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/' + tenp;
+      document.getElementById('image-container').append(image);
+    });
+</script>
+------------------------------------------------------------------------------------------------------------------------
+ЖС получаем видео и выводим на страницу с элементами управления
+------------------------------------------------------------------------------------------------------------------------
+    <div id="video-container"></div>
+    <script>
+        let file = 'BAACAgIAAxkBAAMiZ0dqaqYDdq_1LoIcz81hIAAB7ti4AAKkZAACPV05SgGZlzr_Nv2ZNgQ';
+        fetch('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/getFile?file_id=' + file)
+            .then((response) => response.json())
+            .then((data) => {
+                let tenp = data.result.file_path;
+                console.log(tenp);
+                let video = document.createElement('video'); video.autoplay = false;
+                video.controls = true;
+                video.muted = false;
+                video.height = 340; 
+                video.src = 'https://api.telegram.org/file/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/' + tenp;
+                document.getElementById('video-container').append(video);
+            });
+    </script>
+------------------------------------------------------------------------------------------------------------------------
+
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 28 ноября 2024г &nbsp &nbsp ссылка на видео
+<a href="https://youtu.be/yqjYLT32pcY">https://youtu.be/yqjYLT32pcY</a>
+</p>
+</div>
+</div>
+</section>
+
+
+
 
 
 <!-- ================================================================================================== -->
@@ -150,7 +713,7 @@ C:\Windows\System32\drivers\etc  // папка где лежит хост фай
 </div>
 <div class="card-footer text-muted">
 <p class="card-text"> загружен 3 ноября 2024г &nbsp &nbsp ссылка на видео
-<a href="https://youtu.be/5eDACUOUN_U">https://youtu.be/W99Dc3TpVLk</a>
+<a href="https://youtu.be/W99Dc3TpVLk">https://youtu.be/W99Dc3TpVLk</a>
 </p>
 </div>
 </div>
