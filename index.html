@@ -19,6 +19,7 @@
 <select class="float-end px-4"
 onchange="window.location.href=this.options[this.selectedIndex].value">
 <option VALUE="index.html">Оглавление</option>
+<option VALUE="index.html#telegraph">№26 Телеграмм бот на Ларавел </option>
 <option VALUE="index.html#bot">№25 Телеграмм бот примеры  </option>
 <option VALUE="index.html#docker">№24 Докер на Виндовс 10 WSL </option>
 <option VALUE="index.html#wsl">№23 Линукс на Виндовс 10 WSL </option>
@@ -52,7 +53,237 @@ onchange="window.location.href=this.options[this.selectedIndex].value">
 
 
 
+<section class="p-3  ">
+<a name="telegraph"></a>
+<div class="card ">
+<div class="card-header">
+Видео номер 26
+</div>
+<div class="card-body">
+<h5 class="card-title">Телеграм бот на Laravel 10 и пакете Telegraph. Фреймворк Ларавел и библиотека Телеграф. Webhook</h5>
+<p class="card-text">
+В видео подробно рассказывается об основных возможностях пакета Telegraph на котором  создают ботов для Telegram в фреймворке Laravel. Сначала установим фреймворк на WSL, настроим подключение к базе SQLite, подключим на локалку домен DDNS через SSH, и создадим Webhook на Telegram. Далее будем создавать команды для телеграмм бота, пересылать и получать с сохранением фото, видео и файлы, создавать кнопки, клавиатуры и пр.
+<br>
+<hr />
+</p>
+
+<pre><xmp>
+Использовано в видео:
+===========================================================
+composer create-project laravel/laravel:^10.0 bot  // устанавливаем фреймворк Ларавел 10
+php artisan serve  // запускаем пхп сервер
+-----------------------------------------------------------
+sudo chown -R www-data:www-data /var/www  // даем доступы
+-----------------------------------------------------------
+sudo chmod -R 777 /var/www  // даем права
+-----------------------------------------------------------
+apt-get install libapache2-mod-php -y  // установленные ПХП библиотеки
+apt-get install php-mysqli -y
+apt-get install php-pdo php-sqlite3
+apt-get install php-cli -y
+apt-get install php-common -y
+apt-get install php-zip -y
+apt-get install php-gd -y
+apt-get install php-mbstring -y
+apt-get install php-curl -y
+apt-get install php-xml -y
+apt-get install php-bcmath -y
+apt-get install php-dom -y
+-----------------------------------------------------------
+composer require defstudio/telegraph  // устанавливаем телеграфф установил в папку с фремворком
+php artisan vendor:publish --tag="telegraph-migrations"  // установил миграции
+php artisan migrate  // накатываем миграции
+php artisan vendor:publish --tag="telegraph-config" // создаем конфиг 
+php artisan telegraph:new-bot  // далее вводим токен , потом имя бота 
+ssh -R youruniquesubdomain:80:localhost:8000 serveo.net   // запускаем в отдельной консоли для получения адреса в сети дднс
+php artisan telegraph:set-webhook  // запускаем вебхук в консоли 
+===========================================================
+Создаем свой обработчик и прокидывае путь в конфиге
+-----------------------------------------------------------
+<?php
+namespace App\Http\Telegraph;
+use DefStudio\Telegraph\Handlers\WebhookHandler;
+use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Keyboard\ReplyButton;
+use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
+use DefStudio\Telegraph\Keyboard\Keyboard;
+use DefStudio\Telegraph\Keyboard\Button;
+use Illuminate\Support\Facades\Storage;
+class Handler extends WebhookHandler
+{
+    public function start()  // название фунции соответствует команде в телеге /start
+    {
+		$this->reply("Привет новому пользователю");  // отправка текста
+		//$this->chat->html("<i>Курсив</i>")->send();  //отправляем html
+    }
+}
+----------------------------------------------------------
+Отвечаем на неизвестную команду
+----------------------------------------------------------
+    protected function handleUnknownCommand($text): void
+    {
+        $this->chat->html("Я не понял команды: $text")->send();
+    }
+----------------------------------------------------------
+Получаем текст и возвращаем обратно
+----------------------------------------------------------
+    protected function handleChatMessage($text): void
+    {
+        $this->chat->html($text)->send();
+    }
+----------------------------------------------------------
+Создаем и убираем меню с командами
+----------------------------------------------------------
+    public function com()
+    {
+         Telegraph::registerBotCommands([
+             'help' => 'вызов описания',
+             'fas' => 'пожаловатся'
+         ])->send();
+       // Telegraph::unregisterBotCommands()->send();  // убираем меню
+    }
+    public function help()  
+    {
+        $this->reply('Описание команд...');  
+    }
+    public function fas()  
+    {
+        $this->reply("Жалоба принята!"); 
+    }
+---------------------------------------------------------
+Создаем клавиатуру
+---------------------------------------------------------
+	    public function com()
+    {
+        Telegraph::message('Клавиатура')
+            ->replyKeyboard(ReplyKeyboard::make()->buttons([
+                ReplyButton::make('Текст'),
+                ReplyButton::make('Отправить контакт')->requestContact(),
+                ReplyButton::make('Отправить местоположение')->requestLocation(),
+                ReplyButton::make('Создать опрос')->requestPoll(),
+                ReplyButton::make('Создать тест')->requestQuiz(),
+                ReplyButton::make('Запустить веб-приложение')->webApp('https://www.google.kz/'),
+            ]))->send();
+    }
+    protected function handleChatMessage($text): void
+    {
+        if($text == 'Текст') $this->chat->html('Текст пришел')->send();
+    }
+---------------------------------------------------------
+Убираем клавиатуру
+---------------------------------------------------------
+    public function com()
+    {
+        Telegraph::message('command received')
+        ->removeReplyKeyboard()
+        ->send();
+    }
+--------------------------------------------------------
+Создаем кнопки которые вызывают фото, видео, файл
+--------------------------------------------------------
+	   public function but()
+    {
+        $this->chat
+            ->message('сообщение с кнопками')
+            ->keyboard(
+                Keyboard::make()->buttons([
+                    Button::make( 'Получаем фото  ')->action( 'feedback')->param('value', 1),
+                    Button::make( 'Получаем фото 2')->action( 'feedback')->param('value', 2),
+                    Button::make( 'Получаем видео ')->action( 'feedback')->param('value', 3),
+                    Button::make( 'Получаем файл  ')->action( 'feedback')->param('value', 4),
+                ])
+            )->send();
+    }
+    public function feedback()   
+    {
+        $data = $this->data->get('value'); 
+        if($data == 1)Telegraph::photo('data/foto.jpg')->send();   
+        if($data == 2)Telegraph::photo(Storage::path('public/foto.jpg'))->send();  
+        if($data == 3)Telegraph::video('data/video.mp4')->send(); 
+        if($data == 4)Telegraph::document('data/file.txt')->send();  
+    }
+--------------------------------------------------------------------------	
+Опрос, отвечает на /com
+--------------------------------------------------------------------------
+    public function com()
+    {
+        Telegraph::poll("На каком языке программируете")
+    ->option('php')
+    ->option('typescript')
+    ->option('rust')
+    ->validUntil(now()->addMinutes(5))
+    ->send();
+    }
+--------------------------------------------------------------------------
+Викторина , нужно угадать правильный ответ
+--------------------------------------------------------------------------
+    public function com()
+    {
+        Telegraph::quiz("Какой ваш любимый язык программирования?")
+        ->option('php', correct: true)
+        ->option('typescript')
+        ->option('rust')
+        ->explanation('Мы все любим php, не так ли?')
+        ->validUntil(now()->addMinutes(5))
+        ->send();
+    }
+======================================================	
+Получаем фото, видео и файлы, сохраняем их
+======================================================
+Получаем всё сообщение в жсон файл который удобно форматировать
+------------------------------------------------------
+    protected function handleChatMessage($text): void
+    {
+        $photo = $this->message->toArray();
+        file_put_contents('1.json', json_encode($photo));
+        $this->chat->html($text)->send();
+    }
+------------------------------------------------------
+Получаем файл
+------------------------------------------------------
+    protected function handleChatMessage($text): void
+    {
+        $id_document = $this->message->document()->id();
+        $this->bot->store($id_document, 'bot');  
+    }
+------------------------------------------------------
+Получаем видео
+------------------------------------------------------
+    protected function handleChatMessage($text): void
+    {
+        $id_video = $this->message->video()->id();
+        $this->bot->store($id_video, 'bot');  // сохраняем на локалке,
+    }
+------------------------------------------------------
+Сохраняем последнее (более качественное) фото из массива вариантов
+------------------------------------------------------
+    protected function handleChatMessage($text): void // метод приема всех сообщений
+    {
+         $photo = $this->message->photos()->toArray();  // получаем  в массив инфу о фото в с разными вариантами размеров
+         $data = count($photo) - 1;   // считаем количество элементов массива
+         $id_foto = $photo[$data]['id'];  // берем последнее айди фото из массива
+         $this->bot->store($id_foto, Storage::path('bot/images'), 'name3-foto.jpg');  // сохраняем на локалке,
+    }
+------------------------------------------------------
+
+</xmp></pre>
+
+</div>
+<div class="card-footer text-muted">
+<p class="card-text"> загружен 13 декабря 2024г &nbsp &nbsp ссылка на видео
+<a href="https://youtu.be/fi0JCidjKFI">https://youtu.be/fi0JCidjKFI</a>
+</p>
+</div>
+</div>
+</section>
+
+
+
 <!-- ================================================================================================== -->
+
+
+
+
 <section class="p-3  ">
 <a name="bot"></a>
 <div class="card ">
@@ -596,6 +827,68 @@ let file = 'AgACAgIAAxkBAAMhZ0dbPPzPuaVDPqbMfDrAbgw7MrYAAgHpMRs9XTlKuoZqmmCIAiIB
                 document.getElementById('video-container').append(video);
             });
     </script>
+========================================================================================================================
+ТО ЧТО НЕ БЫЛО В ВИДЕО НО ПУСТЬ ТУТ ПОЛЕЖИТ
+========================================================================================================================
+ПХП Отправка сообщения в ответ на другое сообщение
+------------------------------------------------------------------------------------------------------------------------
+<?php
+    $tg_user = '7124124425';
+    $bot_token = '7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw'; 
+    
+    $text = "Пост сообщение PHP";
+    
+    $params = array( 
+        'chat_id' => $tg_user, 
+        'text' => $text, 
+        'parse_mode' => 'html', 
+        "reply_to_message_id" => 44,  // отвечаем на сообщение 44
+    );
+    
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://api.telegram.org/bot' . $bot_token . '/sendMessage');
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); 
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10); 
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+    $result = curl_exec($curl); // запрос к api
+    curl_close($curl);
+ ?>
+------------------------------------------------------------------------------------------------------------------------
+ПХП веб хук для бота, нужно https, и конкретный домен сервера в сети, передается один раз
+------------------------------------------------------------------------------------------------------------------------
+<?php
+   $token = "7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw";
+
+   $getQuery = array(
+        "url" => "https://..домен../index.php",
+   );
+   $ch = curl_init("https://api.telegram.org/bot". $token ."/setWebhook?" . http_build_query($getQuery));
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+   curl_setopt($ch, CURLOPT_HEADER, false);
+   
+   $resultQuery = curl_exec($ch);
+   curl_close($ch);
+   
+   echo $resultQuery;
+ php?>
+ ------------------------------------------------------------------------------------------------------------------------
+ПХП получаем с вебхука сообщение и сохраняем в файл
+------------------------------------------------------------------------------------------------------------------------
+ <?php
+$data = file_get_contents('php://input');
+file_put_contents('message.txt', $data);
+ ?>
+------------------------------------------------------------------------------------------------------------------------
+ПХП зеркальный ответ на сообщение
+------------------------------------------------------------------------------------------------------------------------
+ <?php
+$json = file_get_contents('php://input');
+$arr = json_decode($json, TRUE);
+$text = $arr['message']['text'];
+$id = $arr['message']['chat']['id'];
+file_get_contents('https://api.telegram.org/bot7753367910:AAEQfKZ7dZ23Jgn32ly1snQv-l8qaxXSNdw/SendMessage?chat_id='.$id.'&text='.$text);
+ ?>
 ------------------------------------------------------------------------------------------------------------------------
 
 </xmp></pre>
@@ -614,6 +907,8 @@ let file = 'AgACAgIAAxkBAAMhZ0dbPPzPuaVDPqbMfDrAbgw7MrYAAgHpMRs9XTlKuoZqmmCIAiIB
 
 
 <!-- ================================================================================================== -->
+
+
 <section class="p-3  ">
 <a name="docker"></a>
 <div class="card ">
@@ -3269,7 +3564,7 @@ href="https://www.youtube.com/watch?v=hJ4Ls0a9l7Y">https://www.youtube.com/watch
 php --version // узнать в консоли версию PHP <br>
 composer --version // узнать версию Composer <br>
 https://getcomposer.org // узнать версию Composer на сайте <br>
-composer self -update // обновить Composer <br>
+composer self-update // обновить Composer <br>
 cd domains // переходим в папку сервера для установки Laravel <br>
 composer create-project laravel/laravel demo // устанавливаем Laravel в папку domains <br>
 cd demo // переходим в папку demo с Laravel<br>
